@@ -1693,7 +1693,7 @@ const PlaylistGrid = ({
   span = "col-12",
 }) => {
   const [pendingPl, setPendingPl] = useStateW(null);
-  const [showAll, setShowAll] = useStateW(false);
+  const [showModal, setShowModal] = useStateW(false);
   const playlists = MA_PLAYLISTS;
 
   const openMusicAssistant = () => {
@@ -1710,11 +1710,72 @@ const PlaylistGrid = ({
       });
     onPlay(pendingPl);
     setPendingPl(null);
+    setShowModal(false);
+  };
+
+  const handlePlaylistClick = (pl) => {
+    if (playingId === pl.id) {
+      // Pause all playing players
+      players
+        .filter((p) => p.state === "playing")
+        .forEach(
+          (p) =>
+            callService &&
+            callService("media_player", "media_pause", {
+              entity_id: p.entity_id,
+            }),
+        );
+      onPlay(pl); // deselect
+    } else {
+      setPendingPl(pendingPl?.id === pl.id ? null : pl);
+    }
   };
 
   const pickable = players.filter((p) => p.state !== "unavailable");
   const list = playlists;
-  const visibleList = showAll ? list : list.slice(0, 2);
+  const visibleList = list.slice(0, 2);
+
+  const renderGrid = (items) => (
+    <div
+      className="playlist-grid"
+      style={{
+        marginTop: 14,
+        gridTemplateColumns:
+          span === "col-6" ? "repeat(2,1fr)" : "repeat(4,1fr)",
+      }}
+    >
+      {items.map((pl) => (
+        <button
+          key={pl.id}
+          className={`pl ${playingId === pl.id ? "playing" : ""} ${pendingPl?.id === pl.id ? "playing" : ""}`}
+          onClick={() => handlePlaylistClick(pl)}
+        >
+          <div
+            className="pl-cover"
+            style={{
+              background: `linear-gradient(135deg, oklch(0.32 0.08 ${pl.hue}) 0%, oklch(0.18 0.04 ${pl.hue}) 100%)`,
+            }}
+          >
+            <div
+              className="pl-play"
+              style={{
+                opacity:
+                  playingId === pl.id || pendingPl?.id === pl.id
+                    ? 1
+                    : undefined,
+              }}
+            >
+              <Icon name={playingId === pl.id ? "pause" : "play"} size={12} />
+            </div>
+          </div>
+          <div>
+            <div className="pl-name">{pl.name}</div>
+            <div className="pl-meta">{pl.meta}</div>
+          </div>
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <div className={`card ${span}`}>
@@ -1738,113 +1799,150 @@ const PlaylistGrid = ({
           <Icon name="search" size={11} /> Browse
         </button>
       </div>
-      <div
-        className="playlist-grid"
-        style={{
-          marginTop: 14,
-          gridTemplateColumns:
-            span === "col-6" ? "repeat(2,1fr)" : "repeat(4,1fr)",
-        }}
-      >
-        {visibleList.map((pl) => (
-          <button
-            key={pl.id}
-            className={`pl ${playingId === pl.id ? "playing" : ""} ${pendingPl?.id === pl.id ? "playing" : ""}`}
-            onClick={() => {
-              if (playingId === pl.id) {
-                // Pause all playing players
-                players
-                  .filter((p) => p.state === "playing")
-                  .forEach(
-                    (p) =>
-                      callService &&
-                      callService("media_player", "media_pause", {
-                        entity_id: p.entity_id,
-                      }),
-                  );
-                onPlay(pl); // deselect
-              } else {
-                setPendingPl(pendingPl?.id === pl.id ? null : pl);
-              }
-            }}
-          >
-            <div
-              className="pl-cover"
-              style={{
-                background: `linear-gradient(135deg, oklch(0.32 0.08 ${pl.hue}) 0%, oklch(0.18 0.04 ${pl.hue}) 100%)`,
-              }}
-            >
-              <div
-                className="pl-play"
-                style={{
-                  opacity:
-                    playingId === pl.id || pendingPl?.id === pl.id
-                      ? 1
-                      : undefined,
-                }}
-              >
-                <Icon name={playingId === pl.id ? "pause" : "play"} size={12} />
-              </div>
-            </div>
-            <div>
-              <div className="pl-name">{pl.name}</div>
-              <div className="pl-meta">{pl.meta}</div>
-            </div>
-          </button>
-        ))}
-      </div>
+
+      {renderGrid(visibleList)}
 
       {list.length > 2 && (
         <button
           className="btn"
           style={{ width: "100%", marginTop: 12, justifyContent: "center" }}
-          onClick={() => setShowAll(!showAll)}
+          onClick={() => setShowModal(true)}
         >
-          {showAll ? "Show less" : `Show ${list.length - 2} more`}
+          Show {list.length - 2} more
         </button>
       )}
 
-      {/* Device picker */}
+      {/* All Playlists Modal */}
+      {showModal && (
+        <div className="modal-backdrop" onClick={() => setShowModal(false)}>
+          <div
+            className="modal"
+            style={{ width: "600px", maxWidth: "90vw" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-h">
+              <div>
+                <div className="modal-title">All Playlists</div>
+                <div className="modal-sub">
+                  Music Assistant · {list.length} playlists
+                </div>
+              </div>
+              <button
+                className="modal-close"
+                onClick={() => setShowModal(false)}
+              >
+                <Icon name="x" size={14} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ paddingBottom: 16 }}>
+              <div
+                className="playlist-grid"
+                style={{
+                  gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+                  marginTop: 0,
+                  gap: 12,
+                }}
+              >
+                {list.map((pl) => (
+                  <button
+                    key={pl.id}
+                    className={`pl ${playingId === pl.id ? "playing" : ""} ${pendingPl?.id === pl.id ? "playing" : ""}`}
+                    onClick={() => handlePlaylistClick(pl)}
+                  >
+                    <div
+                      className="pl-cover"
+                      style={{
+                        background: `linear-gradient(135deg, oklch(0.32 0.08 ${pl.hue}) 0%, oklch(0.18 0.04 ${pl.hue}) 100%)`,
+                      }}
+                    >
+                      <div
+                        className="pl-play"
+                        style={{
+                          opacity:
+                            playingId === pl.id || pendingPl?.id === pl.id
+                              ? 1
+                              : undefined,
+                        }}
+                      >
+                        <Icon
+                          name={playingId === pl.id ? "pause" : "play"}
+                          size={12}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="pl-name">{pl.name}</div>
+                      <div className="pl-meta">{pl.meta}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Device picker Modal */}
       {pendingPl && (
         <div
-          style={{
-            marginTop: 18,
-            borderTop: "1px solid var(--border)",
-            paddingTop: 14,
-          }}
+          className="modal-backdrop"
+          style={{ zIndex: 10000 }}
+          onClick={() => setPendingPl(null)}
         >
           <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: "var(--text-3)",
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              marginBottom: 10,
-            }}
+            className="modal"
+            style={{ width: "320px", maxWidth: "90vw" }}
+            onClick={(e) => e.stopPropagation()}
           >
-            Play "{pendingPl.name}" ({pendingPl.meta.split("· ")[1]}) on…
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {pickable.length === 0 ? (
-              <div style={{ color: "var(--text-3)", fontSize: 12 }}>
-                No players available
+            <div className="modal-h">
+              <div>
+                <div className="modal-title">Play Playlist</div>
+                <div className="modal-sub">
+                  "{pendingPl.name}" ({pendingPl.meta.split("· ")[1]})
+                </div>
               </div>
-            ) : (
-              pickable.map((p) => (
-                <button
-                  key={p.entity_id}
-                  className="btn primary"
-                  onClick={() => handlePick(p)}
+              <button
+                className="modal-close"
+                onClick={() => setPendingPl(null)}
+              >
+                <Icon name="x" size={14} />
+              </button>
+            </div>
+            <div
+              className="modal-body"
+              style={{ display: "flex", flexDirection: "column", gap: 8 }}
+            >
+              {pickable.length === 0 ? (
+                <div
+                  style={{
+                    color: "var(--text-3)",
+                    fontSize: 13,
+                    textAlign: "center",
+                    padding: "20px 0",
+                  }}
                 >
-                  <Icon name="music" size={11} />{" "}
-                  {p.attributes?.friendly_name || p.entity_id.split(".")[1]}
-                </button>
-              ))
-            )}
-            <button className="btn" onClick={() => setPendingPl(null)}>
-              Cancel
-            </button>
+                  No players available
+                </div>
+              ) : (
+                pickable.map((p) => (
+                  <button
+                    key={p.entity_id}
+                    className="btn primary"
+                    style={{
+                      width: "100%",
+                      justifyContent: "flex-start",
+                      padding: "12px 16px",
+                    }}
+                    onClick={() => handlePick(p)}
+                  >
+                    <Icon name="music" size={14} />
+                    <span style={{ marginLeft: 8 }}>
+                      {p.attributes?.friendly_name || p.entity_id.split(".")[1]}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}
