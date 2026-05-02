@@ -1080,9 +1080,11 @@
                     <span className="sep">·</span>
                     {solarKw === null
                       ? "connecting to HA…"
-                      : solarKw > homeKw
+                      : solarKw >= homeKw
                         ? "solar covers all consumption"
-                        : `${solarKw.toFixed(1)} kW solar · ${(homeKw - solarKw).toFixed(1)} kW from grid`}
+                        : battFlowKw !== null && battFlowKw < -0.05
+                          ? "consuming battery power"
+                          : "consuming from grid"}
                   </p>
                 </div>
                 <div className="clock">
