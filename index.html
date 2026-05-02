@@ -692,7 +692,9 @@
           const activePlayers = all.filter(
             (e) =>
               (e.state === "playing" || e.state === "paused") &&
-              !activeGroupMemberIds.has(e.entity_id),
+              !activeGroupMemberIds.has(e.entity_id) &&
+              e.attributes?.media_title &&
+              e.attributes.media_title.trim() !== "",
           );
           return { activePlayers, maPlayers: all }; // maPlayers = unfiltered, for volume sliders
         }, [haStates]);
