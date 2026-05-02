@@ -166,7 +166,13 @@ const EnergyFlow4 = ({
             {solar !== null ? solar.toFixed(1) : "–"}
             <span className="unit">{solar !== null ? "kW" : ""}</span>
           </div>
-          <div className="ef-sub">producing · 4.8 kWp</div>
+          <div className="ef-sub">
+            {solar === null
+              ? "connecting…"
+              : solar > 0.05
+                ? "producing"
+                : "idle"}
+          </div>
         </div>
         <div />
 
@@ -370,7 +376,7 @@ const EnergyFlow4 = ({
             {evFlow !== null && evFlow > 0.05
               ? `charging · +${evFlow.toFixed(1)} kW`
               : evPct !== null
-                ? "not charging"
+                ? "idle"
                 : ""}
           </div>
         </div>
