@@ -70,32 +70,71 @@ def _ws_recv(s):
         return None  # close frame
     return json.loads(payload.decode())
 
-def fetch_ma_playlists():
-    """Connect to MA WebSocket, request all playlists, return list."""
-    s = _ws_connect(MA_HOST, MA_PORT)
+def get_ma_config_entry():
+    import urllib.request
+    req = urllib.request.Request(f"{HA_URL}/api/config/config_entries/entry", headers={'Authorization': f'Bearer {TOKEN}'})
     try:
-        # MA sends a server_info message on connect
-        hello = _ws_recv(s)
-        print(f'  [MA] connected, first msg type: {hello.get("type") if hello else None}')
+        with urllib.request.urlopen(req) as response:
+            entries = json.loads(response.read().decode())
+            for e in entries:
+                if e.get('domain') == 'music_assistant':
+                    return e['entry_id']
+    except Exception as e:
+        print(f"Error fetching config entries: {e}")
+    return None
 
-        # Try MA v2 protocol: command id = 1
-        _ws_send(s, {'message_id': 1, 'command': 'library/items',
-                      'item_type': 'playlist', 'library': True,
-                      'limit': 200, 'offset': 0})
-        msg = _ws_recv(s)
-        print(f'  [MA] library/items response keys: {list(msg.keys()) if msg else None}')
-        items = msg.get('result', {}).get('items') or msg.get('items') or []
-        if items:
-            return items
+def fetch_ma_playlists():
+    """Fetch playlists via HA REST API"""
+    try:
+        import urllib.request
+        entry_id = get_ma_config_entry()
+        if not entry_id:
+            return []
+            
+        payload = json.dumps({
+            "config_entry_id": entry_id,
+            "media_type": "playlist",
+        }).encode('utf-8')
+        
+        req = urllib.request.Request(f"{HA_URL}/api/services/music_assistant/get_library?return_response=true", 
+            data=payload,
+            headers={
+                'Authorization': f'Bearer {TOKEN}',
+                'Content-Type': 'application/json'
+            })
+        res = urllib.request.urlopen(req).read().decode()
+        items = json.loads(res).get('service_response', {}).get('items', [])
+        return items
+    except Exception as e:
+        print(f"Error fetching playlists: {e}")
+        return []
 
-        # Fallback: older command style
-        _ws_send(s, {'message_id': 2, 'command': 'get_library_playlists',
-                      'limit': 200, 'offset': 0})
-        msg2 = _ws_recv(s)
-        print(f'  [MA] get_library_playlists response: {list(msg2.keys()) if msg2 else None}')
-        return msg2.get('result') or msg2.get('items') or []
-    finally:
-        s.close()
+def search_ma(query, limit=5):
+    """Search MA via HA REST API with library_only=False"""
+    try:
+        import urllib.request
+        entry_id = get_ma_config_entry()
+        if not entry_id:
+            return {}
+
+        payload = json.dumps({
+            "config_entry_id": entry_id,
+            "name": query,
+            "library_only": False,
+            "limit": limit
+        }).encode('utf-8')
+
+        req = urllib.request.Request(f"{HA_URL}/api/services/music_assistant/search?return_response=true", 
+            data=payload,
+            headers={
+                'Authorization': f'Bearer {TOKEN}',
+                'Content-Type': 'application/json'
+            })
+        res = urllib.request.urlopen(req).read().decode()
+        return json.loads(res).get('service_response', {})
+    except Exception as e:
+        print(f"Error searching MA: {e}")
+        return {}
 
 def fetch_queue(entity_id):
     """Fetch MA queue for a player via HA REST service call."""
@@ -160,6 +199,14 @@ class Handler(SimpleHTTPRequestHandler):
                 self._serve_json(items)
             except Exception as e:
                 print(f'  [MA] fetch error: {e}')
+                self._serve_json({'error': str(e)})
+        elif self.path.startswith('/ma-search'):
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query).get('q', [''])[0]
+            try:
+                self._serve_json(search_ma(q) if q else {})
+            except Exception as e:
+                print(f'  [search] error: {e}')
                 self._serve_json({'error': str(e)})
         else:
             super().do_GET()

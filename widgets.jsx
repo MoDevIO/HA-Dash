@@ -1694,11 +1694,24 @@ const PlaylistGrid = ({
 }) => {
   const [pendingPl, setPendingPl] = useStateW(null);
   const [showModal, setShowModal] = useStateW(false);
+  const [showSearch, setShowSearch] = useStateW(false);
+  const [searchQuery, setSearchQuery] = useStateW("");
+  const [searchData, setSearchData] = useStateW(null);
   const playlists = MA_PLAYLISTS;
 
-  const openMusicAssistant = () => {
-    window.open(MUSIC_ASSISTANT_URL, "_blank", "noopener,noreferrer");
-  };
+  useEffectW(() => {
+    if (!showSearch || !searchQuery) {
+      setSearchData(null);
+      return;
+    }
+    const t = setTimeout(() => {
+      fetch(`/ma-search?q=${encodeURIComponent(searchQuery)}`)
+        .then((r) => r.json())
+        .then(setSearchData)
+        .catch(() => setSearchData(null));
+    }, 400);
+    return () => clearTimeout(t);
+  }, [searchQuery, showSearch]);
 
   const handlePick = (player) => {
     if (!pendingPl) return;
@@ -1706,11 +1719,12 @@ const PlaylistGrid = ({
       callService("music_assistant", "play_media", {
         entity_id: player.entity_id,
         media_id: pendingPl.uri,
-        media_type: "playlist",
+        media_type: pendingPl.type || "playlist",
       });
     onPlay(pendingPl);
     setPendingPl(null);
     setShowModal(false);
+    setShowSearch(false);
   };
 
   const handlePlaylistClick = (pl) => {
@@ -1795,8 +1809,8 @@ const PlaylistGrid = ({
             Music Assistant · {list.length || "…"} playlists
           </div>
         </div>
-        <button className="btn" onClick={openMusicAssistant}>
-          <Icon name="search" size={11} /> Browse
+        <button className="btn" onClick={() => setShowSearch(true)}>
+          <Icon name="search" size={11} /> Search
         </button>
       </div>
 
@@ -1882,6 +1896,162 @@ const PlaylistGrid = ({
         </div>
       )}
 
+      {/* MA Search Modal */}
+      {showSearch && (
+        <div className="modal-backdrop" onClick={() => setShowSearch(false)}>
+          <div
+            className="modal"
+            style={{
+              width: "600px",
+              maxWidth: "90vw",
+              maxHeight: "80vh",
+              display: "flex",
+              flexDirection: "column",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-h">
+              <div style={{ flex: 1 }}>
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="Search Music Assistant..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    width: "100%",
+                    background: "var(--bg-3)",
+                    border: "1px solid var(--border)",
+                    color: "var(--text-1)",
+                    padding: "8px 12px",
+                    borderRadius: "6px",
+                    outline: "none",
+                  }}
+                />
+              </div>
+              <button
+                className="modal-close"
+                onClick={() => setShowSearch(false)}
+                style={{ marginLeft: 16 }}
+              >
+                <Icon name="x" size={14} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ overflowY: "auto", flex: 1 }}>
+              {!searchQuery && (
+                <div
+                  style={{
+                    padding: 32,
+                    textAlign: "center",
+                    color: "var(--text-3)",
+                  }}
+                >
+                  Type to start searching across all providers...
+                </div>
+              )}
+              {searchQuery && !searchData && (
+                <div
+                  style={{
+                    padding: 32,
+                    textAlign: "center",
+                    color: "var(--text-3)",
+                  }}
+                >
+                  Searching...
+                </div>
+              )}
+              {searchData &&
+                ["playlists", "tracks", "albums", "artists", "podcasts"].map(
+                  (type) => {
+                    const results = searchData[type];
+                    if (!results || results.length === 0) return null;
+                    return (
+                      <div key={type} style={{ marginBottom: 24 }}>
+                        <div
+                          style={{
+                            textTransform: "capitalize",
+                            fontWeight: 600,
+                            color: "var(--text-2)",
+                            marginBottom: 12,
+                            paddingBottom: 4,
+                            borderBottom: "1px solid var(--border)",
+                          }}
+                        >
+                          {type}
+                        </div>
+                        <div
+                          className="playlist-grid"
+                          style={{
+                            gridTemplateColumns:
+                              "repeat(auto-fill, minmax(130px, 1fr))",
+                            marginTop: 0,
+                            gap: 12,
+                          }}
+                        >
+                          {results.map((item, idx) => {
+                            // Use uri if available, otherwise just use a fallback index
+                            const itemId =
+                              item.uri || item.item_id || `${type}-${idx}`;
+                            return (
+                              <button
+                                key={itemId}
+                                className={`pl ${pendingPl?.id === itemId ? "playing" : ""}`}
+                                onClick={() => {
+                                  setPendingPl({
+                                    id: itemId,
+                                    name: item.name,
+                                    type: item.media_type || type, // track, artist, album, playlist
+                                    uri: item.uri,
+                                    meta:
+                                      item.version ||
+                                      item.metadata?.label ||
+                                      type,
+                                    hue: Math.floor(Math.random() * 360),
+                                  });
+                                }}
+                              >
+                                <div
+                                  className="pl-cover"
+                                  style={{
+                                    background: item.image
+                                      ? `url(${item.image}) center/cover`
+                                      : `linear-gradient(135deg, oklch(0.32 0.08 ${Math.floor(Math.random() * 360)}) 0%, oklch(0.18 0.04 200) 100%)`,
+                                  }}
+                                >
+                                  <div
+                                    className="pl-play"
+                                    style={{
+                                      opacity:
+                                        pendingPl?.id === itemId
+                                          ? 1
+                                          : undefined,
+                                    }}
+                                  >
+                                    <Icon name="play" size={12} />
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="pl-name">{item.name}</div>
+                                  <div className="pl-meta">
+                                    {item.version
+                                      ? `${type} · ${item.version}`
+                                      : type}
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  },
+                )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Device picker Modal */}
       {pendingPl && (
         <div
@@ -1896,9 +2066,14 @@ const PlaylistGrid = ({
           >
             <div className="modal-h">
               <div>
-                <div className="modal-title">Play Playlist</div>
+                <div className="modal-title">
+                  Play {pendingPl.type ? pendingPl.type : "Playlist"}
+                </div>
                 <div className="modal-sub">
-                  "{pendingPl.name}" ({pendingPl.meta.split("· ")[1]})
+                  "{pendingPl.name}"{" "}
+                  {pendingPl.meta && pendingPl.meta.includes("· ")
+                    ? `(${pendingPl.meta.split("· ")[1]})`
+                    : `(${pendingPl.meta})`}
                 </div>
               </div>
               <button
