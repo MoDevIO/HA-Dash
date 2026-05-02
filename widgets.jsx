@@ -64,24 +64,43 @@ const EnergyFlow4 = ({
   const hRight = { x: cx + hw, y: cy };
 
   // Helper: animated dot with fade-in/out
-  const FlowDot = ({ path, dur, begin, dashed }) => (
-    <circle r="2.5" fill="var(--text)">
-      <animateMotion
-        dur={`${dur}s`}
-        begin={`${begin}s`}
-        repeatCount="indefinite"
-        path={path}
-      />
-      <animate
-        attributeName="opacity"
-        values="0;1;1;0"
-        keyTimes="0;0.12;0.82;1"
-        dur={`${dur}s`}
-        begin={`${begin}s`}
-        repeatCount="indefinite"
-      />
-    </circle>
-  );
+  const FlowDot = ({ path, dur, begin }) => {
+    // Parse simple straight line path "M x1 y1 L x2 y2"
+    const match = path.match(
+      /M\s*(-?[0-9.]+)\s+(-?[0-9.]+)\s+L\s+(-?[0-9.]+)\s+(-?[0-9.]+)/,
+    );
+    const x1 = match ? match[1] : 0;
+    const y1 = match ? match[2] : 0;
+    const x2 = match ? match[3] : 0;
+    const y2 = match ? match[4] : 0;
+
+    return (
+      <circle r="2.5" fill="var(--text)" opacity="0" cx={x1} cy={y1}>
+        <animate
+          attributeName="cx"
+          values={`${x1};${x2}`}
+          dur={`${dur}s`}
+          begin={`${begin}s`}
+          repeatCount="indefinite"
+        />
+        <animate
+          attributeName="cy"
+          values={`${y1};${y2}`}
+          dur={`${dur}s`}
+          begin={`${begin}s`}
+          repeatCount="indefinite"
+        />
+        <animate
+          attributeName="opacity"
+          values="0;1;1;0"
+          keyTimes="0;0.12;0.82;1"
+          dur={`${dur}s`}
+          begin={`${begin}s`}
+          repeatCount="indefinite"
+        />
+      </circle>
+    );
+  };
 
   const solarPath = `M ${solarEnd.x} ${solarEnd.y} L ${hTop.x} ${hTop.y}`;
   const carPath = `M ${hBot.x} ${hBot.y} L ${carEnd.x} ${carEnd.y}`;
