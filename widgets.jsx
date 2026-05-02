@@ -1656,19 +1656,26 @@ const MA_PLAYLISTS = [
   {
     id: "pl2",
     name: "Liked Songs",
+    meta: "Spotify · Nini",
+    hue: 30,
+    uri: "library://playlist/172",
+  },
+  {
+    id: "pl3",
+    name: "Liked Songs",
     meta: "Spotify · motijo",
     hue: 220,
     uri: "library://playlist/7",
   },
   {
-    id: "pl3",
+    id: "pl4",
     name: "Discover Weekly",
     meta: "Spotify · ttttttom",
     hue: 280,
     uri: "library://playlist/166",
   },
   {
-    id: "pl4",
+    id: "pl5",
     name: "Discover Weekly",
     meta: "Spotify · motijo",
     hue: 160,
