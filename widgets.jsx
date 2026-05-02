@@ -1686,6 +1686,7 @@ const PlaylistGrid = ({
   span = "col-12",
 }) => {
   const [pendingPl, setPendingPl] = useStateW(null);
+  const [showAll, setShowAll] = useStateW(false);
   const playlists = MA_PLAYLISTS;
 
   const openMusicAssistant = () => {
@@ -1706,6 +1707,7 @@ const PlaylistGrid = ({
 
   const pickable = players.filter((p) => p.state !== "unavailable");
   const list = playlists;
+  const visibleList = showAll ? list : list.slice(0, 2);
 
   return (
     <div className={`card ${span}`}>
@@ -1737,7 +1739,7 @@ const PlaylistGrid = ({
             span === "col-6" ? "repeat(2,1fr)" : "repeat(4,1fr)",
         }}
       >
-        {list.map((pl) => (
+        {visibleList.map((pl) => (
           <button
             key={pl.id}
             className={`pl ${playingId === pl.id ? "playing" : ""} ${pendingPl?.id === pl.id ? "playing" : ""}`}
@@ -1784,6 +1786,16 @@ const PlaylistGrid = ({
           </button>
         ))}
       </div>
+
+      {list.length > 2 && (
+        <button
+          className="btn"
+          style={{ width: "100%", marginTop: 12, justifyContent: "center" }}
+          onClick={() => setShowAll(!showAll)}
+        >
+          {showAll ? "Show less" : `Show ${list.length - 2} more`}
+        </button>
+      )}
 
       {/* Device picker */}
       {pendingPl && (
