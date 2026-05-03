@@ -1,1332 +1,1320 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Home — HA Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="dashboard.css" />
-  </head>
-  <body>
-    <div id="root"></div>
 
-    <script
-      src="https://unpkg.com/react@18.3.1/umd/react.development.js"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"
-      crossorigin="anonymous"
-    ></script>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Home — HA Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
 
-    <script src="ha-config.js"></script>
-    <script type="text/babel" src="tweaks-panel.jsx"></script>
-    <script type="text/babel" src="components.jsx"></script>
-    <script type="text/babel" src="widgets.jsx"></script>
+<body>
+  <div id="root"></div>
 
-    <script type="text/babel">
-      const { useState, useEffect, useMemo } = React;
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
 
-      const TWEAK_DEFAULTS = { theme: "dark", accent: "neutral" };
+  <script src="ha-config.js"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="widgets.jsx"></script>
 
-      const ACCENTS = {
-        neutral: {
-          dark: "#f5f5f5",
-          light: "#14130f",
-          on_dark: "#0a0a0a",
-          on_light: "#ffffff",
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    const TWEAK_DEFAULTS = { theme: "dark", accent: "neutral" };
+
+    const ACCENTS = {
+      neutral: {
+        dark: "#f5f5f5",
+        light: "#14130f",
+        on_dark: "#0a0a0a",
+        on_light: "#ffffff",
+      },
+      amber: {
+        dark: "#d4a574",
+        light: "#9c6a3c",
+        on_dark: "#1a1208",
+        on_light: "#ffffff",
+      },
+      cyan: {
+        dark: "#7dd3fc",
+        light: "#0891b2",
+        on_dark: "#06121a",
+        on_light: "#ffffff",
+      },
+      green: {
+        dark: "#9bc89b",
+        light: "#3f6b3f",
+        on_dark: "#0a140a",
+        on_light: "#ffffff",
+      },
+      purple: {
+        dark: "#c4b5fd",
+        light: "#6d4ec7",
+        on_dark: "#100a1f",
+        on_light: "#ffffff",
+      },
+    };
+
+    const FLOORS = {
+      EG: [
+        {
+          id: "dining",
+          name: "Dining Room",
+          icon: "table",
+          lights: 4,
+          sensor: "21.4°C · 48%",
         },
-        amber: {
-          dark: "#d4a574",
-          light: "#9c6a3c",
-          on_dark: "#1a1208",
-          on_light: "#ffffff",
+        {
+          id: "kitchen",
+          name: "Kitchen",
+          icon: "chefhat",
+          lights: 6,
+          sensor: "22.1°C · 52%",
         },
-        cyan: {
-          dark: "#7dd3fc",
-          light: "#0891b2",
-          on_dark: "#06121a",
-          on_light: "#ffffff",
+        {
+          id: "fireplace",
+          name: "Fireplace Room",
+          icon: "fire",
+          lights: 3,
+          sensor: "23.8°C · 41%",
         },
-        green: {
-          dark: "#9bc89b",
-          light: "#3f6b3f",
-          on_dark: "#0a140a",
-          on_light: "#ffffff",
+        {
+          id: "office",
+          name: "Office",
+          icon: "desk",
+          lights: 2,
+          sensor: "21.0°C · 46%",
         },
-        purple: {
-          dark: "#c4b5fd",
-          light: "#6d4ec7",
-          on_dark: "#100a1f",
-          on_light: "#ffffff",
+        {
+          id: "hallway",
+          name: "Hallway",
+          icon: "door",
+          lights: 3,
+          sensor: "20.2°C",
         },
-      };
+        {
+          id: "wardrobe",
+          name: "Wardrobe",
+          icon: "door",
+          lights: 1,
+          sensor: "19.8°C",
+        },
+        {
+          id: "stairs",
+          name: "Stairs",
+          icon: "stairs",
+          lights: 2,
+          sensor: "20.4°C",
+        },
+        {
+          id: "bath-eg",
+          name: "Bath EG",
+          icon: "bath",
+          lights: 2,
+          sensor: "22.6°C · 58%",
+        },
+      ],
+      OG: [
+        {
+          id: "living",
+          name: "Living Room",
+          icon: "sofa",
+          lights: 5,
+          sensor: "22.4°C · 44%",
+        },
+        {
+          id: "bedroom",
+          name: "Bedroom",
+          icon: "bed",
+          lights: 3,
+          sensor: "20.8°C · 47%",
+        },
+        {
+          id: "mo",
+          name: "Mo's Room",
+          icon: "kid",
+          lights: 2,
+          sensor: "21.2°C · 49%",
+        },
+        {
+          id: "levin",
+          name: "Levin's Room",
+          icon: "kid",
+          lights: 2,
+          sensor: "21.6°C · 50%",
+        },
+        {
+          id: "guest",
+          name: "Guest Room",
+          icon: "bed",
+          lights: 2,
+          sensor: "20.4°C · 45%",
+        },
+        {
+          id: "bath-og",
+          name: "Bath OG",
+          icon: "bath",
+          lights: 3,
+          sensor: "22.8°C · 60%",
+        },
+      ],
+    };
 
-      const FLOORS = {
-        EG: [
-          {
-            id: "dining",
-            name: "Dining Room",
-            icon: "table",
-            lights: 4,
-            sensor: "21.4°C · 48%",
-          },
-          {
-            id: "kitchen",
-            name: "Kitchen",
-            icon: "chefhat",
-            lights: 6,
-            sensor: "22.1°C · 52%",
-          },
-          {
-            id: "fireplace",
-            name: "Fireplace Room",
-            icon: "fire",
-            lights: 3,
-            sensor: "23.8°C · 41%",
-          },
-          {
-            id: "office",
-            name: "Office",
-            icon: "desk",
-            lights: 2,
-            sensor: "21.0°C · 46%",
-          },
-          {
-            id: "hallway",
-            name: "Hallway",
-            icon: "door",
-            lights: 3,
-            sensor: "20.2°C",
-          },
-          {
-            id: "wardrobe",
-            name: "Wardrobe",
-            icon: "door",
-            lights: 1,
-            sensor: "19.8°C",
-          },
-          {
-            id: "stairs",
-            name: "Stairs",
-            icon: "stairs",
-            lights: 2,
-            sensor: "20.4°C",
-          },
-          {
-            id: "bath-eg",
-            name: "Bath EG",
-            icon: "bath",
-            lights: 2,
-            sensor: "22.6°C · 58%",
-          },
-        ],
-        OG: [
-          {
-            id: "living",
-            name: "Living Room",
-            icon: "sofa",
-            lights: 5,
-            sensor: "22.4°C · 44%",
-          },
-          {
-            id: "bedroom",
-            name: "Bedroom",
-            icon: "bed",
-            lights: 3,
-            sensor: "20.8°C · 47%",
-          },
-          {
-            id: "mo",
-            name: "Mo's Room",
-            icon: "kid",
-            lights: 2,
-            sensor: "21.2°C · 49%",
-          },
-          {
-            id: "levin",
-            name: "Levin's Room",
-            icon: "kid",
-            lights: 2,
-            sensor: "21.6°C · 50%",
-          },
-          {
-            id: "guest",
-            name: "Guest Room",
-            icon: "bed",
-            lights: 2,
-            sensor: "20.4°C · 45%",
-          },
-          {
-            id: "bath-og",
-            name: "Bath OG",
-            icon: "bath",
-            lights: 3,
-            sensor: "22.8°C · 60%",
-          },
-        ],
-      };
+    const ALL_ROOMS = [...FLOORS.EG, ...FLOORS.OG];
+    const ROOM_BY_ID = Object.fromEntries(ALL_ROOMS.map((r) => [r.id, r]));
 
-      const ALL_ROOMS = [...FLOORS.EG, ...FLOORS.OG];
-      const ROOM_BY_ID = Object.fromEntries(ALL_ROOMS.map((r) => [r.id, r]));
+    // HA entity candidates per room — first non-unavailable wins
+    const ROOM_ENTITIES = {
+      office: ["light.arbeitszimmer"],
+      fireplace: ["light.kaminzimmer", "light.kaminzimmer_lichter"],
+      kitchen: ["light.kuche_lichter", "light.shelly_kuche_1_2"],
+      levin: ["light.levin", "light.levin_1"],
+      mo: ["light.mo", "light.mo_1"],
+      "bath-eg": ["light.shelly_bad_eg_2"],
+      "bath-og": ["light.shelly_bad_og"],
+      wardrobe: ["light.shelly_diele"],
+      dining: ["light.shelly_esszimmer_2"],
+      hallway: ["light.shelly_flur_2"],
+      guest: ["light.shelly_gastezimmer"],
+      stairs: ["light.shelly_treppe"],
+    };
 
-      // HA entity candidates per room — first non-unavailable wins
-      const ROOM_ENTITIES = {
-        office: ["light.arbeitszimmer"],
-        fireplace: ["light.kaminzimmer", "light.kaminzimmer_lichter"],
-        kitchen: ["light.kuche_lichter", "light.shelly_kuche_1_2"],
-        levin: ["light.levin", "light.levin_1"],
-        mo: ["light.mo", "light.mo_1"],
-        "bath-eg": ["light.shelly_bad_eg_2"],
-        "bath-og": ["light.shelly_bad_og"],
-        wardrobe: ["light.shelly_diele"],
-        dining: ["light.shelly_esszimmer_2"],
-        hallway: ["light.shelly_flur_2"],
-        guest: ["light.shelly_gastezimmer"],
-        stairs: ["light.shelly_treppe"],
-      };
+    const pickEntity = (states, ids) => {
+      for (const id of ids) {
+        const e = states[id];
+        if (e && e.state !== "unavailable") return e;
+      }
+      return null;
+    };
 
-      const pickEntity = (states, ids) => {
-        for (const id of ids) {
-          const e = states[id];
-          if (e && e.state !== "unavailable") return e;
-        }
-        return null;
-      };
+    // Individual light entities per room (shown in room modal with full controls)
+    const ROOM_LIGHTS_MAP = {
+      office: [
+        "light.work_1",
+        "light.work_2",
+        "light.work_3",
+        "light.work_4",
+        "light.work_5",
+        "light.work_6",
+      ],
+      fireplace: ["light.kamin_1", "light.kamin_2", "light.kamin_3"],
+      kitchen: ["light.kuche_lichter", "light.shelly_kuche_1_2"],
+      levin: ["light.levin_1"],
+      mo: ["light.mo_1"],
+      "bath-eg": ["light.shelly_bad_eg_2"],
+      "bath-og": ["light.shelly_bad_og"],
+      wardrobe: ["light.shelly_diele"],
+      dining: ["light.shelly_esszimmer_2"],
+      hallway: ["light.shelly_flur_2"],
+      guest: ["light.shelly_gastezimmer"],
+      stairs: ["light.shelly_treppe"],
+    };
 
-      // Individual light entities per room (shown in room modal with full controls)
-      const ROOM_LIGHTS_MAP = {
-        office: [
-          "light.work_1",
-          "light.work_2",
-          "light.work_3",
-          "light.work_4",
-          "light.work_5",
-          "light.work_6",
-        ],
-        fireplace: ["light.kamin_1", "light.kamin_2", "light.kamin_3"],
-        kitchen: ["light.kuche_lichter", "light.shelly_kuche_1_2"],
-        levin: ["light.levin_1"],
-        mo: ["light.mo_1"],
-        "bath-eg": ["light.shelly_bad_eg_2"],
-        "bath-og": ["light.shelly_bad_og"],
-        wardrobe: ["light.shelly_diele"],
-        dining: ["light.shelly_esszimmer_2"],
-        hallway: ["light.shelly_flur_2"],
-        guest: ["light.shelly_gastezimmer"],
-        stairs: ["light.shelly_treppe"],
-      };
+    // Real device entities per room (vacuum, media players, etc.)
+    const ROOM_DEVICES_MAP = {
+      fireplace: ["vacuum.q5_pro"],
+      kitchen: ["media_player.kuche_2"],
+      office: ["media_player.jk_macbook"],
+    };
 
-      // Real device entities per room (vacuum, media players, etc.)
-      const ROOM_DEVICES_MAP = {
-        fireplace: ["vacuum.q5_pro"],
-        kitchen: ["media_player.kuche_2"],
-        office: ["media_player.jk_macbook"],
-      };
+    const initRoomState = () => {
+      const s = {};
+      ALL_ROOMS.forEach((r) => {
+        s[r.id] = { on: false, brightness: 60 };
+      });
+      return s;
+    };
 
-      const initRoomState = () => {
-        const s = {};
-        ALL_ROOMS.forEach((r) => {
-          s[r.id] = { on: false, brightness: 60 };
-        });
-        return s;
-      };
-
-      // Room card: toggle switch on card + click name/footer to open modal
-      const RoomCard = ({ room, state, lightCount, onToggle, onOpen }) => (
-        <div className={`room-card ${state.on ? "on" : "off"}`}>
-          <div className="room-head">
-            <div
-              style={{ flex: 1, cursor: "pointer" }}
-              onClick={() => onOpen(room.id)}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span className="room-glyph">
-                  <Icon name={room.icon} size={16} />
-                </span>
-                <span className="room-name">{room.name}</span>
-              </div>
-              <div className="room-meta">{lightCount} lights</div>
-            </div>
-            <Toggle on={state.on} onChange={(v) => onToggle(room.id, v)} />
-          </div>
+    // Room card: toggle switch on card + click name/footer to open modal
+    const RoomCard = ({ room, state, lightCount, onToggle, onOpen }) => (
+      <div className={`room-card ${state.on ? "on" : "off"}`}>
+        <div className="room-head">
           <div
-            style={{
-              fontSize: 11,
-              color: "var(--text-3)",
-              fontFamily: "var(--font-mono)",
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              marginTop: "auto",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              cursor: "pointer",
-            }}
+            style={{ flex: 1, cursor: "pointer" }}
             onClick={() => onOpen(room.id)}
           >
-            <span
-              className={`chip ${state.on ? "live" : ""}`}
-              style={{ marginRight: "auto" }}
-            >
-              <span className="dot" />
-              {state.on
-                ? state.hasBrightness
-                  ? state.brightness + "%"
-                  : "on"
-                : "off"}
-            </span>
-            Open details <Icon name="arrowR" size={12} />
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span className="room-glyph">
+                <Icon name={room.icon} size={16} />
+              </span>
+              <span className="room-name">{room.name}</span>
+            </div>
+            <div className="room-meta">{lightCount} lights</div>
           </div>
+          <Toggle on={state.on} onChange={(v) => onToggle(room.id, v)} />
         </div>
+        <div
+          style={{
+            fontSize: 11,
+            color: "var(--text-3)",
+            fontFamily: "var(--font-mono)",
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            marginTop: "auto",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            cursor: "pointer",
+          }}
+          onClick={() => onOpen(room.id)}
+        >
+          <span
+            className={`chip ${state.on ? "live" : ""}`}
+            style={{ marginRight: "auto" }}
+          >
+            <span className="dot" />
+            {state.on
+              ? state.hasBrightness
+                ? state.brightness + "%"
+                : "on"
+              : "off"}
+          </span>
+          Open details <Icon name="arrowR" size={12} />
+        </div>
+      </div>
+    );
+
+    // =================== PAGES ===================
+
+    const HomePage = ({
+      rooms,
+      toggleRoom,
+      dimRoom,
+      openRoom,
+      activePlayers,
+      callService,
+      solarKw = null,
+      gridKw = null,
+      battPct = null,
+      battFlowKw = null,
+      homeKw = null,
+      evBattPct = null,
+      evChargKw = null,
+      solarTodayKwh = null,
+      consumedTodayKwh = null,
+      exportedTodayKwh = null,
+    }) => {
+      // Floor master calls the same HA-aware toggleRoom/dimRoom for each room
+      const setFloorMaster = (floor, on) =>
+        FLOORS[floor].forEach((room) => toggleRoom(room.id, on));
+      const setFloorBrightness = (floor, v) =>
+        FLOORS[floor].forEach((room) => dimRoom(room.id, v));
+      const egOn = FLOORS.EG.some((r) => rooms[r.id]?.on);
+      const ogOn = FLOORS.OG.some((r) => rooms[r.id]?.on);
+      const egBright = Math.round(
+        FLOORS.EG.reduce((a, r) => a + (rooms[r.id]?.brightness || 0), 0) /
+        FLOORS.EG.length,
       );
-
-      // =================== PAGES ===================
-
-      const HomePage = ({
-        rooms,
-        toggleRoom,
-        dimRoom,
-        openRoom,
-        activePlayers,
-        callService,
-        solarKw = null,
-        gridKw = null,
-        battPct = null,
-        battFlowKw = null,
-        homeKw = null,
-        evBattPct = null,
-        evChargKw = null,
-        solarTodayKwh = null,
-        consumedTodayKwh = null,
-        exportedTodayKwh = null,
-      }) => {
-        // Floor master calls the same HA-aware toggleRoom/dimRoom for each room
-        const setFloorMaster = (floor, on) =>
-          FLOORS[floor].forEach((room) => toggleRoom(room.id, on));
-        const setFloorBrightness = (floor, v) =>
-          FLOORS[floor].forEach((room) => dimRoom(room.id, v));
-        const egOn = FLOORS.EG.some((r) => rooms[r.id]?.on);
-        const ogOn = FLOORS.OG.some((r) => rooms[r.id]?.on);
-        const egBright = Math.round(
-          FLOORS.EG.reduce((a, r) => a + (rooms[r.id]?.brightness || 0), 0) /
-            FLOORS.EG.length,
-        );
-        const ogBright = Math.round(
-          FLOORS.OG.reduce((a, r) => a + (rooms[r.id]?.brightness || 0), 0) /
-            FLOORS.OG.length,
-        );
-        return (
-          <>
-            <div className="grid">
-              <EnergyFlow4
-                solar={solarKw}
-                grid={gridKw}
-                battery={battPct}
-                batteryFlow={battFlowKw}
-                home={homeKw}
-                evPct={evBattPct}
-                evFlow={evChargKw}
-              />
-              <EnergyTodayCard
-                solarToday={solarTodayKwh}
-                consumedToday={consumedTodayKwh}
-                exportedToday={exportedTodayKwh}
+      const ogBright = Math.round(
+        FLOORS.OG.reduce((a, r) => a + (rooms[r.id]?.brightness || 0), 0) /
+        FLOORS.OG.length,
+      );
+      return (
+        <>
+          <div className="grid">
+            <EnergyFlow4
+              solar={solarKw}
+              grid={gridKw}
+              battery={battPct}
+              batteryFlow={battFlowKw}
+              home={homeKw}
+              evPct={evBattPct}
+              evFlow={evChargKw}
+            />
+            <EnergyTodayCard
+              solarToday={solarTodayKwh}
+              consumedToday={consumedTodayKwh}
+              exportedToday={exportedTodayKwh}
+            />
+          </div>
+          <div className="divider-label">
+            <span className="lbl">Floors</span>
+            <span className="line" />
+          </div>
+          <div className="grid">
+            <div className="col-6">
+              <FloorMaster
+                floor="EG"
+                name="Ground Floor · EG"
+                rooms={FLOORS.EG}
+                roomState={rooms}
+                masterOn={egOn}
+                onToggleAll={(on) => setFloorMaster("EG", on)}
+                onOpenRoom={openRoom}
               />
             </div>
-            <div className="divider-label">
-              <span className="lbl">Floors</span>
-              <span className="line" />
+            <div className="col-6">
+              <FloorMaster
+                floor="OG"
+                name="Upper Floor · OG"
+                rooms={FLOORS.OG}
+                roomState={rooms}
+                masterOn={ogOn}
+                onToggleAll={(on) => setFloorMaster("OG", on)}
+                onOpenRoom={openRoom}
+              />
             </div>
-            <div className="grid">
-              <div className="col-6">
-                <FloorMaster
-                  floor="EG"
-                  name="Ground Floor · EG"
-                  rooms={FLOORS.EG}
-                  roomState={rooms}
-                  masterOn={egOn}
-                  onToggleAll={(on) => setFloorMaster("EG", on)}
-                  onOpenRoom={openRoom}
-                />
-              </div>
-              <div className="col-6">
-                <FloorMaster
-                  floor="OG"
-                  name="Upper Floor · OG"
-                  rooms={FLOORS.OG}
-                  roomState={rooms}
-                  masterOn={ogOn}
-                  onToggleAll={(on) => setFloorMaster("OG", on)}
-                  onOpenRoom={openRoom}
-                />
-              </div>
-            </div>
-            {activePlayers.length > 0 && (
-              <>
-                <div className="divider-label">
-                  <span className="lbl">Now Playing</span>
-                  <span className="line" />
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "var(--gap)",
-                  }}
-                >
-                  {activePlayers.map((p) => (
-                    <div key={p.entity_id} className="grid">
-                      <MediaNowPlaying player={p} callService={callService} />
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-            <div className="divider-label">
-              <span className="lbl">Quick Actions</span>
-              <span className="line" />
-            </div>
-            <div className="grid">
-              <QuickActions />
-            </div>
-          </>
-        );
-      };
-
-      const RoomsPage = ({
-        floor,
-        setFloor,
-        rooms,
-        roomLightCounts,
-        toggleRoom,
-        openRoom,
-      }) => {
-        return (
-          <>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                marginBottom: 20,
-              }}
-            >
-              <div className="floor-tabs">
-                <button
-                  className={`floor-tab ${floor === "EG" ? "active" : ""}`}
-                  onClick={() => setFloor("EG")}
-                >
-                  Ground · EG
-                </button>
-                <button
-                  className={`floor-tab ${floor === "OG" ? "active" : ""}`}
-                  onClick={() => setFloor("OG")}
-                >
-                  Upper · OG
-                </button>
+          </div>
+          {activePlayers.length > 0 && (
+            <>
+              <div className="divider-label">
+                <span className="lbl">Now Playing</span>
+                <span className="line" />
               </div>
               <div
                 style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "var(--gap)",
+                }}
+              >
+                {activePlayers.map((p) => (
+                  <div key={p.entity_id} className="grid">
+                    <MediaNowPlaying player={p} callService={callService} />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          <div className="divider-label">
+            <span className="lbl">Quick Actions</span>
+            <span className="line" />
+          </div>
+          <div className="grid">
+            <QuickActions />
+          </div>
+        </>
+      );
+    };
+
+    const RoomsPage = ({
+      floor,
+      setFloor,
+      rooms,
+      roomLightCounts,
+      toggleRoom,
+      openRoom,
+    }) => {
+      return (
+        <>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 20,
+            }}
+          >
+            <div className="floor-tabs">
+              <button
+                className={`floor-tab ${floor === "EG" ? "active" : ""}`}
+                onClick={() => setFloor("EG")}
+              >
+                Ground · EG
+              </button>
+              <button
+                className={`floor-tab ${floor === "OG" ? "active" : ""}`}
+                onClick={() => setFloor("OG")}
+              >
+                Upper · OG
+              </button>
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                color: "var(--text-3)",
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+              }}
+            >
+              {FLOORS[floor].length} rooms ·{" "}
+              {FLOORS[floor].filter((r) => rooms[r.id]?.on).length} active
+            </div>
+          </div>
+          <div className="rooms-grid">
+            {FLOORS[floor].map((room) => (
+              <RoomCard
+                key={room.id}
+                room={room}
+                state={rooms[room.id]}
+                lightCount={roomLightCounts[room.id] ?? room.lights}
+                onToggle={toggleRoom}
+                onOpen={openRoom}
+              />
+            ))}
+          </div>
+        </>
+      );
+    };
+
+    const MediaPage = ({
+      activePlayers,
+      maPlayers,
+      callService,
+      playingPl,
+      setPlayingPl,
+    }) => (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "var(--gap)",
+        }}
+      >
+        {activePlayers.length === 0 ? (
+          <div className="grid">
+            <div
+              className="card col-12"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: 160,
+              }}
+            >
+              <div
+                style={{
+                  textAlign: "center",
+                  color: "var(--text-3)",
                   fontFamily: "var(--font-mono)",
                   fontSize: 11,
-                  color: "var(--text-3)",
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
                 }}
               >
-                {FLOORS[floor].length} rooms ·{" "}
-                {FLOORS[floor].filter((r) => rooms[r.id]?.on).length} active
+                Nothing playing
               </div>
             </div>
-            <div className="rooms-grid">
-              {FLOORS[floor].map((room) => (
-                <RoomCard
-                  key={room.id}
-                  room={room}
-                  state={rooms[room.id]}
-                  lightCount={roomLightCounts[room.id] ?? room.lights}
-                  onToggle={toggleRoom}
-                  onOpen={openRoom}
-                />
-              ))}
+          </div>
+        ) : (
+          activePlayers.map((p) => (
+            <div key={p.entity_id} className="grid">
+              <MediaFullPlayer player={p} callService={callService} />
             </div>
-          </>
-        );
-      };
+          ))
+        )}
+        <div className="grid" style={{ alignItems: "start" }}>
+          <MediaZones
+            players={maPlayers}
+            callService={callService}
+            span="col-6"
+          />
+          <PlaylistGrid
+            playingId={playingPl}
+            onPlay={(p) => setPlayingPl(playingPl === p.id ? null : p.id)}
+            players={maPlayers}
+            callService={callService}
+            span="col-6"
+          />
+        </div>
+      </div>
+    );
 
-      const MediaPage = ({
-        activePlayers,
-        maPlayers,
-        callService,
-        playingPl,
-        setPlayingPl,
-      }) => (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--gap)",
-          }}
-        >
-          {activePlayers.length === 0 ? (
-            <div className="grid">
-              <div
-                className="card col-12"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  minHeight: 160,
-                }}
-              >
-                <div
-                  style={{
-                    textAlign: "center",
-                    color: "var(--text-3)",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 11,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                  }}
-                >
-                  Nothing playing
-                </div>
-              </div>
-            </div>
-          ) : (
-            activePlayers.map((p) => (
-              <div key={p.entity_id} className="grid">
-                <MediaFullPlayer player={p} callService={callService} />
-              </div>
-            ))
-          )}
-          <div className="grid" style={{ alignItems: "start" }}>
-            <MediaZones
-              players={maPlayers}
-              callService={callService}
-              span="col-6"
+    const EnergyPage = ({
+      solar = null,
+      grid = null,
+      batt = null,
+      battFlow = null,
+      home = null,
+      evPct = null,
+      evFlow = null,
+    }) => {
+      const f = (v, d = 1) => (v === null ? "–" : v.toFixed(d));
+      return (
+        <>
+          <div className="grid" style={{ marginBottom: 20 }}>
+            <EnergyMetric
+              label="SOLAR"
+              icon="sun"
+              value={f(solar)}
+              unit={solar !== null ? "kW" : ""}
+              sub={solar !== null ? "producing · 4.8 kWp" : "connecting…"}
+              accent={solar !== null ? "LIVE" : null}
             />
-            <PlaylistGrid
-              playingId={playingPl}
-              onPlay={(p) => setPlayingPl(playingPl === p.id ? null : p.id)}
-              players={maPlayers}
-              callService={callService}
-              span="col-6"
+            <EnergyMetric
+              label="BATTERY"
+              icon="bolt"
+              value={f(batt, 0)}
+              unit={batt !== null ? "%" : ""}
+              sub={
+                battFlow === null
+                  ? "connecting…"
+                  : Math.abs(battFlow) < 0.05
+                    ? "standby"
+                    : `${battFlow >= 0 ? "charging" : "discharging"} · ${Math.abs(battFlow).toFixed(1)} kW`
+              }
+            />
+            <EnergyMetric
+              label="GRID NET"
+              icon="plug"
+              value={f(grid)}
+              unit={grid !== null ? "kW" : ""}
+              sub={
+                grid !== null
+                  ? grid < 0
+                    ? "importing from grid"
+                    : "exporting surplus"
+                  : "connecting…"
+              }
+            />
+            <EnergyMetric
+              label="HOUSE USE"
+              icon="home"
+              value={f(home)}
+              unit={home !== null ? "kW" : ""}
+              sub={home !== null ? "live consumption" : "connecting…"}
             />
           </div>
-        </div>
+          <div className="grid">
+            <EnergyFlow4
+              solar={solar}
+              grid={grid}
+              battery={batt}
+              batteryFlow={battFlow}
+              home={home}
+              evPct={evPct}
+              evFlow={evFlow}
+              span="col-12"
+            />
+          </div>
+          <div className="divider-label">
+            <span className="lbl">History</span>
+            <span className="line" />
+          </div>
+          <div className="grid">
+            <EnergyChart />
+          </div>
+        </>
       );
+    };
 
-      const EnergyPage = ({
-        solar = null,
-        grid = null,
-        batt = null,
-        battFlow = null,
-        home = null,
-        evPct = null,
-        evFlow = null,
-      }) => {
-        const f = (v, d = 1) => (v === null ? "–" : v.toFixed(d));
-        return (
-          <>
-            <div className="grid" style={{ marginBottom: 20 }}>
-              <EnergyMetric
-                label="SOLAR"
-                icon="sun"
-                value={f(solar)}
-                unit={solar !== null ? "kW" : ""}
-                sub={solar !== null ? "producing · 4.8 kWp" : "connecting…"}
-                accent={solar !== null ? "LIVE" : null}
-              />
-              <EnergyMetric
-                label="BATTERY"
-                icon="bolt"
-                value={f(batt, 0)}
-                unit={batt !== null ? "%" : ""}
-                sub={
-                  battFlow === null
-                    ? "connecting…"
-                    : Math.abs(battFlow) < 0.05
-                      ? "standby"
-                      : `${battFlow >= 0 ? "charging" : "discharging"} · ${Math.abs(battFlow).toFixed(1)} kW`
-                }
-              />
-              <EnergyMetric
-                label="GRID NET"
-                icon="plug"
-                value={f(grid)}
-                unit={grid !== null ? "kW" : ""}
-                sub={
-                  grid !== null
-                    ? grid < 0
-                      ? "importing from grid"
-                      : "exporting surplus"
-                    : "connecting…"
-                }
-              />
-              <EnergyMetric
-                label="HOUSE USE"
-                icon="home"
-                value={f(home)}
-                unit={home !== null ? "kW" : ""}
-                sub={home !== null ? "live consumption" : "connecting…"}
-              />
-            </div>
-            <div className="grid">
-              <EnergyFlow4
-                solar={solar}
-                grid={grid}
-                battery={batt}
-                batteryFlow={battFlow}
-                home={home}
-                evPct={evPct}
-                evFlow={evFlow}
-                span="col-12"
-              />
-            </div>
-            <div className="divider-label">
-              <span className="lbl">History</span>
-              <span className="line" />
-            </div>
-            <div className="grid">
-              <EnergyChart />
-            </div>
-          </>
+    const DevicesPage = ({
+      vacuumState = null,
+      vacuumBattery = null,
+      vacuumLastClean = null,
+      vacuumArea = null,
+      vacuumTime = null,
+      evPct = null,
+      evRange = null,
+      evKw = null,
+      callService,
+    }) => (
+      <div className="grid">
+        <VacuumCard
+          span="col-6"
+          vacState={vacuumState}
+          batteryPct={vacuumBattery}
+          lastCleanBegin={vacuumLastClean}
+          cleaningArea={vacuumArea}
+          cleaningTime={vacuumTime}
+          callService={callService}
+          entityId="vacuum.q5_pro"
+        />
+        <EVCard span="col-6" evPct={evPct} evRange={evRange} evKw={evKw} />
+      </div>
+    );
+
+    const PAGES = [
+      { id: "home", name: "Home", icon: "home" },
+      { id: "rooms", name: "Rooms", icon: "grid" },
+      { id: "media", name: "Media", icon: "music" },
+      { id: "devices", name: "Devices", icon: "plug" },
+    ];
+
+    const App = () => {
+      const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+      const [page, setPage] = useState("home");
+      const [userName, setUserName] = useState(
+        () => localStorage.getItem("ha_dash_user") || "",
+      );
+      const [namePrompt, setNamePrompt] = useState(false);
+      const [nameInput, setNameInput] = useState("");
+      useEffect(() => {
+        if (!userName) setNamePrompt(true);
+      }, []);
+      const [floor, setFloor] = useState("EG");
+      const [rooms, setRooms] = useState(initRoomState);
+      const [now, setNow] = useState(new Date());
+      const [playingPl, setPlayingPl] = useState(null);
+      const [openRoomId, setOpenRoomId] = useState(null);
+      const [haStates, setHaStates] = useState({});
+      const [lastSync, setLastSync] = useState(null);
+
+      useEffect(() => {
+        const t = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(t);
+      }, []);
+
+      // ── Media players from HA ─────────────────────────────────────────────────
+      const PLAYER_BLACKLIST = ["Mo", "CarPlay", "JK MacBook", "Room"];
+      const { activePlayers, maPlayers } = useMemo(() => {
+        const order = {
+          playing: 0,
+          paused: 1,
+          idle: 2,
+          off: 3,
+          unavailable: 4,
+        };
+        const all = Object.values(haStates)
+          .filter((e) => {
+            if (
+              !e.entity_id.startsWith("media_player.") ||
+              e.state === "unavailable"
+            )
+              return false;
+            const name = (e.attributes?.friendly_name || "").toLowerCase();
+            return !PLAYER_BLACKLIST.some((b) => name === b.toLowerCase());
+          })
+          .sort((a, b) => (order[a.state] ?? 5) - (order[b.state] ?? 5));
+        // Only suppress members of ACTIVE groups (playing/paused) — idle groups don't mask solo players
+        const activeGroupMemberIds = new Set(
+          all
+            .filter((e) => e.state === "playing" || e.state === "paused")
+            .flatMap((e) => e.attributes?.group_members || []),
         );
+        const activePlayers = all.filter(
+          (e) =>
+            (e.state === "playing" || e.state === "paused") &&
+            !activeGroupMemberIds.has(e.entity_id) &&
+            e.attributes?.media_title &&
+            e.attributes.media_title.trim() !== "",
+        );
+        return { activePlayers, maPlayers: all }; // maPlayers = unfiltered, for volume sliders
+      }, [haStates]);
+      const activePlayer = activePlayers[0] || null;
+      useEffect(() => {
+        document.documentElement.dataset.theme = tweaks.theme;
+        const a = ACCENTS[tweaks.accent] || ACCENTS.neutral;
+        const isDark = tweaks.theme === "dark";
+        document.documentElement.style.setProperty(
+          "--accent",
+          isDark ? a.dark : a.light,
+        );
+        document.documentElement.style.setProperty(
+          "--accent-on",
+          isDark ? a.on_dark : a.on_light,
+        );
+      }, [tweaks.theme, tweaks.accent]);
+
+      // ── HA API ────────────────────────────────────────────────────────────────
+      // optimistic overrides: entity_id → { state?, attributes?, until (ms timestamp) }
+      const optimisticRef = React.useRef({});
+
+      const callService = async (domain, service, data) => {
+        // Optimistic media_player updates so UI never flickers/disappears
+        if (domain === "media_player" && data?.entity_id) {
+          const id = data.entity_id;
+          const until = Date.now() + 8000; // hold override for 8s
+          setHaStates((s) => {
+            const e = s[id];
+            if (!e) return s;
+            let patch = null;
+            if (service === "media_pause") patch = { state: "paused" };
+            else if (
+              service === "media_play" ||
+              service === "media_play_pause"
+            )
+              patch = { state: "playing" };
+            else if (
+              service === "media_next_track" ||
+              service === "media_previous_track"
+            )
+              patch = { state: "playing" };
+            // stop / turn_off → show as paused so card stays visible until next real poll
+            else if (service === "media_stop") patch = { state: "idle" };
+            else if (service === "turn_off") patch = { state: "paused" };
+            else if (service === "volume_set" && data.volume_level != null)
+              patch = {
+                attributes: {
+                  ...e.attributes,
+                  volume_level: data.volume_level,
+                },
+              };
+            else if (
+              service === "volume_mute" &&
+              data.is_volume_muted != null
+            )
+              patch = {
+                attributes: {
+                  ...e.attributes,
+                  is_volume_muted: data.is_volume_muted,
+                },
+              };
+            if (!patch) return s;
+            // record override so poll doesn't overwrite within the hold window
+            optimisticRef.current[id] = { ...patch, until };
+            return {
+              ...s,
+              [id]: {
+                ...e,
+                ...patch,
+                attributes: { ...e.attributes, ...(patch.attributes || {}) },
+              },
+            };
+          });
+        }
+        try {
+          await fetch(`${HA_CONFIG.url}/api/services/${domain}/${service}`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${HA_CONFIG.token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+        } catch (_) { }
       };
 
-      const DevicesPage = ({
-        vacuumState = null,
-        vacuumBattery = null,
-        vacuumLastClean = null,
-        vacuumArea = null,
-        vacuumTime = null,
-        evPct = null,
-        evRange = null,
-        evKw = null,
-        callService,
-      }) => (
-        <div className="grid">
-          <VacuumCard
-            span="col-6"
-            vacState={vacuumState}
-            batteryPct={vacuumBattery}
-            lastCleanBegin={vacuumLastClean}
-            cleaningArea={vacuumArea}
-            cleaningTime={vacuumTime}
-            callService={callService}
-            entityId="vacuum.q5_pro"
-          />
-          <EVCard span="col-6" evPct={evPct} evRange={evRange} evKw={evKw} />
-        </div>
-      );
-
-      const PAGES = [
-        { id: "home", name: "Home", icon: "home" },
-        { id: "rooms", name: "Rooms", icon: "grid" },
-        { id: "media", name: "Media", icon: "music" },
-        { id: "devices", name: "Devices", icon: "plug" },
-      ];
-
-      const App = () => {
-        const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
-        const [page, setPage] = useState("home");
-        const [userName, setUserName] = useState(
-          () => localStorage.getItem("ha_dash_user") || "",
-        );
-        const [namePrompt, setNamePrompt] = useState(false);
-        const [nameInput, setNameInput] = useState("");
-        useEffect(() => {
-          if (!userName) setNamePrompt(true);
-        }, []);
-        const [floor, setFloor] = useState("EG");
-        const [rooms, setRooms] = useState(initRoomState);
-        const [now, setNow] = useState(new Date());
-        const [playingPl, setPlayingPl] = useState(null);
-        const [openRoomId, setOpenRoomId] = useState(null);
-        const [haStates, setHaStates] = useState({});
-        const [lastSync, setLastSync] = useState(null);
-
-        useEffect(() => {
-          const t = setInterval(() => setNow(new Date()), 1000);
-          return () => clearInterval(t);
-        }, []);
-
-        // ── Media players from HA ─────────────────────────────────────────────────
-        const PLAYER_BLACKLIST = ["Mo", "CarPlay", "JK MacBook", "Room"];
-        const { activePlayers, maPlayers } = useMemo(() => {
-          const order = {
-            playing: 0,
-            paused: 1,
-            idle: 2,
-            off: 3,
-            unavailable: 4,
-          };
-          const all = Object.values(haStates)
-            .filter((e) => {
-              if (
-                !e.entity_id.startsWith("media_player.") ||
-                e.state === "unavailable"
-              )
-                return false;
-              const name = (e.attributes?.friendly_name || "").toLowerCase();
-              return !PLAYER_BLACKLIST.some((b) => name === b.toLowerCase());
-            })
-            .sort((a, b) => (order[a.state] ?? 5) - (order[b.state] ?? 5));
-          // Only suppress members of ACTIVE groups (playing/paused) — idle groups don't mask solo players
-          const activeGroupMemberIds = new Set(
-            all
-              .filter((e) => e.state === "playing" || e.state === "paused")
-              .flatMap((e) => e.attributes?.group_members || []),
-          );
-          const activePlayers = all.filter(
-            (e) =>
-              (e.state === "playing" || e.state === "paused") &&
-              !activeGroupMemberIds.has(e.entity_id) &&
-              e.attributes?.media_title &&
-              e.attributes.media_title.trim() !== "",
-          );
-          return { activePlayers, maPlayers: all }; // maPlayers = unfiltered, for volume sliders
-        }, [haStates]);
-        const activePlayer = activePlayers[0] || null;
-        useEffect(() => {
-          document.documentElement.dataset.theme = tweaks.theme;
-          const a = ACCENTS[tweaks.accent] || ACCENTS.neutral;
-          const isDark = tweaks.theme === "dark";
-          document.documentElement.style.setProperty(
-            "--accent",
-            isDark ? a.dark : a.light,
-          );
-          document.documentElement.style.setProperty(
-            "--accent-on",
-            isDark ? a.on_dark : a.on_light,
-          );
-        }, [tweaks.theme, tweaks.accent]);
-
-        // ── HA API ────────────────────────────────────────────────────────────────
-        // optimistic overrides: entity_id → { state?, attributes?, until (ms timestamp) }
-        const optimisticRef = React.useRef({});
-
-        const callService = async (domain, service, data) => {
-          // Optimistic media_player updates so UI never flickers/disappears
-          if (domain === "media_player" && data?.entity_id) {
-            const id = data.entity_id;
-            const until = Date.now() + 8000; // hold override for 8s
-            setHaStates((s) => {
-              const e = s[id];
-              if (!e) return s;
-              let patch = null;
-              if (service === "media_pause") patch = { state: "paused" };
-              else if (
-                service === "media_play" ||
-                service === "media_play_pause"
-              )
-                patch = { state: "playing" };
-              else if (
-                service === "media_next_track" ||
-                service === "media_previous_track"
-              )
-                patch = { state: "playing" };
-              // stop / turn_off → show as paused so card stays visible until next real poll
-              else if (service === "media_stop") patch = { state: "idle" };
-              else if (service === "turn_off") patch = { state: "paused" };
-              else if (service === "volume_set" && data.volume_level != null)
-                patch = {
-                  attributes: {
-                    ...e.attributes,
-                    volume_level: data.volume_level,
-                  },
-                };
-              else if (
-                service === "volume_mute" &&
-                data.is_volume_muted != null
-              )
-                patch = {
-                  attributes: {
-                    ...e.attributes,
-                    is_volume_muted: data.is_volume_muted,
-                  },
-                };
-              if (!patch) return s;
-              // record override so poll doesn't overwrite within the hold window
-              optimisticRef.current[id] = { ...patch, until };
-              return {
-                ...s,
-                [id]: {
-                  ...e,
-                  ...patch,
-                  attributes: { ...e.attributes, ...(patch.attributes || {}) },
-                },
-              };
-            });
-          }
+      useEffect(() => {
+        const poll = async () => {
           try {
-            await fetch(`${HA_CONFIG.url}/api/services/${domain}/${service}`, {
-              method: "POST",
+            const res = await fetch(`${HA_CONFIG.url}/api/states`, {
               headers: {
                 Authorization: `Bearer ${HA_CONFIG.token}`,
-                "Content-Type": "application/json",
+                "Cache-Control": "no-store",
               },
-              body: JSON.stringify(data),
+              cache: "no-store",
             });
-          } catch (_) {}
-        };
-
-        useEffect(() => {
-          const poll = async () => {
-            try {
-              const res = await fetch(`${HA_CONFIG.url}/api/states`, {
-                headers: {
-                  Authorization: `Bearer ${HA_CONFIG.token}`,
-                  "Cache-Control": "no-store",
-                },
-                cache: "no-store",
-              });
-              const list = await res.json();
-              const now = Date.now();
-              const map = {};
-              list.forEach((e) => {
-                const override = optimisticRef.current[e.entity_id];
-                if (override && now < override.until) {
-                  const { until: _, ...patch } = override;
-                  map[e.entity_id] = {
-                    ...e,
-                    ...(patch.state !== undefined
-                      ? { state: patch.state }
-                      : {}),
-                    attributes: {
-                      ...e.attributes,
-                      ...(patch.attributes || {}),
-                    },
-                  };
-                } else {
-                  if (override) delete optimisticRef.current[e.entity_id];
-                  map[e.entity_id] = e;
-                }
-              });
-              setHaStates(map);
-              setLastSync(Date.now());
-            } catch (_) {}
-          };
-          poll();
-          const t = setInterval(poll, 3000);
-          return () => clearInterval(t);
-        }, []);
-
-        // Merged room state: HA authoritative for connected rooms, local state fallback
-        const { effectiveRooms, roomLightCounts } = useMemo(() => {
-          const merged = { ...rooms };
-          if (!Object.keys(haStates).length)
-            return { effectiveRooms: merged, roomLightCounts: {} };
-          Object.entries(ROOM_ENTITIES).forEach(([roomId, candidates]) => {
-            const e = pickEntity(haStates, candidates);
-            if (e) {
-              const modes = e.attributes?.supported_color_modes || [];
-              const hasBrightness = modes.some((m) => m !== "onoff");
-              merged[roomId] = {
-                on: e.state === "on",
-                brightness: e.attributes?.brightness
-                  ? Math.round(e.attributes.brightness / 2.55)
-                  : merged[roomId]?.brightness || 60,
-                hasBrightness,
-              };
-            }
-          });
-          const counts = {};
-          Object.entries(ROOM_LIGHTS_MAP).forEach(([roomId, ids]) => {
-            counts[roomId] = ids.length;
-          });
-          return { effectiveRooms: merged, roomLightCounts: counts };
-        }, [haStates, rooms]);
-
-        // Energy from HA sensors — null when HA not loaded (no fake fallbacks)
-        const ha = (id) => {
-          const v = parseFloat(haStates[id]?.state);
-          return isNaN(v) ? 0 : v;
-        };
-        const haLoaded = Object.keys(haStates).length > 0;
-        const solarKw = haLoaded ? ha("sensor.foxess_pv_power") : null;
-        const feedinKw = ha("sensor.foxess_feedin_power");
-        const gridImpKw = ha("sensor.foxess_grid_consumption_power");
-        const gridKw = haLoaded ? feedinKw - gridImpKw : null;
-        const battPct = haLoaded ? ha("sensor.batterie") : null;
-        const batChgKw = ha("sensor.foxess_bat_charge_power");
-        const batDisKw = ha("sensor.foxess_bat_discharge_power");
-        const battFlowKw = haLoaded ? batChgKw - batDisKw : null;
-        const homeKw = haLoaded ? ha("sensor.foxess_load_power") : null;
-        const solarTodayKwh = haLoaded
-          ? ha("sensor.foxess_pvenergytotal")
-          : null;
-        const exportedTodayKwh = haLoaded ? ha("sensor.foxess_feedin") : null;
-        const consumedTodayKwh = haLoaded ? ha("sensor.foxess_load") : null;
-
-        // EV
-        const evBattPct = haLoaded ? ha("sensor.auto_battery_level") : null;
-        const evRangeKm = haLoaded
-          ? ha("sensor.auto_battery_cruising_range")
-          : null;
-        const evChargKw = haLoaded ? ha("sensor.auto_charging_power") : null;
-
-        // Vacuum
-        const vacuumState = haLoaded
-          ? haStates["vacuum.q5_pro"]?.state || "idle"
-          : null;
-        const vacuumBattPct = haLoaded ? ha("sensor.q5_pro_battery") : null;
-        const vacuumLastClean =
-          haStates["sensor.q5_pro_last_clean_begin"]?.state || null;
-        const vacuumArea = haLoaded ? ha("sensor.q5_pro_cleaning_area") : null;
-        const vacuumTime = haLoaded ? ha("sensor.q5_pro_cleaning_time") : null;
-
-        // Persons
-        const haPersons =
-          Object.keys(haStates).length === 0
-            ? null
-            : [
-                {
-                  name: "Tom",
-                  entity: "device_tracker.person_tom",
-                  initials: "TO",
-                },
-                {
-                  name: "Levin",
-                  entity: "device_tracker.levin",
-                  initials: "LE",
-                },
-                {
-                  name: "Mo",
-                  entity: "device_tracker.person_mo",
-                  initials: "MO",
-                },
-                {
-                  name: "Lennard",
-                  entity: "device_tracker.person_lennard",
-                  initials: "LN",
-                },
-                {
-                  name: "Nina",
-                  entity: "device_tracker.person_nina",
-                  initials: "NI",
-                },
-              ].map((p) => {
-                const e = haStates[p.entity];
-                const st = e?.state;
-                return {
-                  name: p.name,
-                  initials: p.initials,
-                  state: st === "home" ? "home" : "away",
-                  loc:
-                    st === "home"
-                      ? "Home"
-                      : st === "unknown" || !st
-                        ? "Unknown"
-                        : st,
+            const list = await res.json();
+            const now = Date.now();
+            const map = {};
+            list.forEach((e) => {
+              const override = optimisticRef.current[e.entity_id];
+              if (override && now < override.until) {
+                const { until: _, ...patch } = override;
+                map[e.entity_id] = {
+                  ...e,
+                  ...(patch.state !== undefined
+                    ? { state: patch.state }
+                    : {}),
+                  attributes: {
+                    ...e.attributes,
+                    ...(patch.attributes || {}),
+                  },
                 };
-              });
-
-        const onCount = useMemo(
-          () => Object.values(effectiveRooms).filter((s) => s.on).length,
-          [effectiveRooms],
-        );
-        const greeting = useMemo(() => {
-          const h = now.getHours();
-          if (h < 5) return "Good night";
-          if (h < 11) return "Good morning";
-          if (h < 14) return "Good day";
-          if (h < 18) return "Good afternoon";
-          return "Good evening";
-        }, [now]);
-        const time = now.toLocaleTimeString("en-GB", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-        const sec = now.toLocaleTimeString("en-GB", { second: "2-digit" });
-        const date = now.toLocaleDateString("en-GB", {
-          weekday: "long",
-          day: "2-digit",
-          month: "long",
-        });
-        const currentPage = PAGES.find((p) => p.id === page);
-
-        const toggleRoom = (id, v) => {
-          const e = pickEntity(haStates, ROOM_ENTITIES[id] || []);
-          if (e) {
-            setHaStates((s) => ({
-              ...s,
-              [e.entity_id]: { ...s[e.entity_id], state: v ? "on" : "off" },
-            }));
-            callService("light", v ? "turn_on" : "turn_off", {
-              entity_id: e.entity_id,
+              } else {
+                if (override) delete optimisticRef.current[e.entity_id];
+                map[e.entity_id] = e;
+              }
             });
-          } else {
-            setRooms((r) => ({
-              ...r,
-              [id]: { ...r[id], on: v !== undefined ? v : !r[id].on },
-            }));
-          }
+            setHaStates(map);
+            setLastSync(Date.now());
+          } catch (_) { }
         };
-        const dimRoom = (id, v) => {
-          const e = pickEntity(haStates, ROOM_ENTITIES[id] || []);
+        poll();
+        const t = setInterval(poll, 3000);
+        return () => clearInterval(t);
+      }, []);
+
+      // Merged room state: HA authoritative for connected rooms, local state fallback
+      const { effectiveRooms, roomLightCounts } = useMemo(() => {
+        const merged = { ...rooms };
+        if (!Object.keys(haStates).length)
+          return { effectiveRooms: merged, roomLightCounts: {} };
+        Object.entries(ROOM_ENTITIES).forEach(([roomId, candidates]) => {
+          const e = pickEntity(haStates, candidates);
           if (e) {
-            setHaStates((s) => ({
-              ...s,
-              [e.entity_id]: {
-                ...s[e.entity_id],
-                state: v > 0 ? "on" : "off",
-                attributes: {
-                  ...s[e.entity_id]?.attributes,
-                  brightness: Math.round(v * 2.55),
-                },
+            const modes = e.attributes?.supported_color_modes || [];
+            const hasBrightness = modes.some((m) => m !== "onoff");
+            merged[roomId] = {
+              on: e.state === "on",
+              brightness: e.attributes?.brightness
+                ? Math.round(e.attributes.brightness / 2.55)
+                : merged[roomId]?.brightness || 60,
+              hasBrightness,
+            };
+          }
+        });
+        const counts = {};
+        Object.entries(ROOM_LIGHTS_MAP).forEach(([roomId, ids]) => {
+          counts[roomId] = ids.length;
+        });
+        return { effectiveRooms: merged, roomLightCounts: counts };
+      }, [haStates, rooms]);
+
+      // Energy from HA sensors — null when HA not loaded (no fake fallbacks)
+      const ha = (id) => {
+        const v = parseFloat(haStates[id]?.state);
+        return isNaN(v) ? 0 : v;
+      };
+      const haLoaded = Object.keys(haStates).length > 0;
+      const solarKw = haLoaded ? ha("sensor.foxess_pv_power") : null;
+      const feedinKw = ha("sensor.foxess_feedin_power");
+      const gridImpKw = ha("sensor.foxess_grid_consumption_power");
+      const gridKw = haLoaded ? feedinKw - gridImpKw : null;
+      const battPct = haLoaded ? ha("sensor.batterie") : null;
+      const batChgKw = ha("sensor.foxess_bat_charge_power");
+      const batDisKw = ha("sensor.foxess_bat_discharge_power");
+      const battFlowKw = haLoaded ? batChgKw - batDisKw : null;
+      const homeKw = haLoaded ? ha("sensor.foxess_load_power") : null;
+      const solarTodayKwh = haLoaded
+        ? ha("sensor.foxess_pvenergytotal")
+        : null;
+      const exportedTodayKwh = haLoaded ? ha("sensor.foxess_feedin") : null;
+      const consumedTodayKwh = haLoaded ? ha("sensor.foxess_load") : null;
+
+      // EV
+      const evBattPct = haLoaded ? ha("sensor.auto_battery_level") : null;
+      const evRangeKm = haLoaded
+        ? ha("sensor.auto_battery_cruising_range")
+        : null;
+      const evChargKw = haLoaded ? ha("sensor.auto_charging_power") : null;
+
+      // Vacuum
+      const vacuumState = haLoaded
+        ? haStates["vacuum.q5_pro"]?.state || "idle"
+        : null;
+      const vacuumBattPct = haLoaded ? ha("sensor.q5_pro_battery") : null;
+      const vacuumLastClean =
+        haStates["sensor.q5_pro_last_clean_begin"]?.state || null;
+      const vacuumArea = haLoaded ? ha("sensor.q5_pro_cleaning_area") : null;
+      const vacuumTime = haLoaded ? ha("sensor.q5_pro_cleaning_time") : null;
+
+      // Persons
+      const haPersons =
+        Object.keys(haStates).length === 0
+          ? null
+          : [
+            {
+              name: "Mo",
+              entity: "device_tracker.person_mo",
+              initials: "MO",
+            },
+            {
+              name: "Levin",
+              entity: "device_tracker.levin",
+              initials: "LE",
+            },
+            {
+              name: "Nina",
+              entity: "device_tracker.person_nina",
+              initials: "NI",
+            },
+            {
+              name: "Tom",
+              entity: "device_tracker.person_tom",
+              initials: "TO",
+            },
+          ].map((p) => {
+            const e = haStates[p.entity];
+            const st = e?.state;
+            return {
+              name: p.name,
+              initials: p.initials,
+              state: st === "home" ? "home" : "away",
+              loc:
+                st === "home"
+                  ? "Home"
+                  : st === "unknown" || !st
+                    ? "Unknown"
+                    : st,
+            };
+          });
+
+      const onCount = useMemo(
+        () => Object.values(effectiveRooms).filter((s) => s.on).length,
+        [effectiveRooms],
+      );
+      const greeting = useMemo(() => {
+        const h = now.getHours();
+        if (h < 5) return "Good night";
+        if (h < 11) return "Good morning";
+        if (h < 14) return "Good day";
+        if (h < 18) return "Good afternoon";
+        return "Good evening";
+      }, [now]);
+      const time = now.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const sec = now.toLocaleTimeString("en-GB", { second: "2-digit" });
+      const date = now.toLocaleDateString("en-GB", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+      });
+      const currentPage = PAGES.find((p) => p.id === page);
+
+      const toggleRoom = (id, v) => {
+        const e = pickEntity(haStates, ROOM_ENTITIES[id] || []);
+        if (e) {
+          setHaStates((s) => ({
+            ...s,
+            [e.entity_id]: { ...s[e.entity_id], state: v ? "on" : "off" },
+          }));
+          callService("light", v ? "turn_on" : "turn_off", {
+            entity_id: e.entity_id,
+          });
+        } else {
+          setRooms((r) => ({
+            ...r,
+            [id]: { ...r[id], on: v !== undefined ? v : !r[id].on },
+          }));
+        }
+      };
+      const dimRoom = (id, v) => {
+        const e = pickEntity(haStates, ROOM_ENTITIES[id] || []);
+        if (e) {
+          setHaStates((s) => ({
+            ...s,
+            [e.entity_id]: {
+              ...s[e.entity_id],
+              state: v > 0 ? "on" : "off",
+              attributes: {
+                ...s[e.entity_id]?.attributes,
+                brightness: Math.round(v * 2.55),
               },
-            }));
-            callService("light", v > 0 ? "turn_on" : "turn_off", {
-              entity_id: e.entity_id,
-              ...(v > 0 ? { brightness_pct: v } : {}),
-            });
-          } else {
-            setRooms((r) => ({
-              ...r,
-              [id]: { ...r[id], brightness: v, on: v > 0 },
-            }));
-          }
-        };
+            },
+          }));
+          callService("light", v > 0 ? "turn_on" : "turn_off", {
+            entity_id: e.entity_id,
+            ...(v > 0 ? { brightness_pct: v } : {}),
+          });
+        } else {
+          setRooms((r) => ({
+            ...r,
+            [id]: { ...r[id], brightness: v, on: v > 0 },
+          }));
+        }
+      };
 
-        return (
-          <div className="app" data-screen-label={currentPage.name}>
-            <aside className="sidebar">
-              <div className="brand">
-                <div className="brand-dot" />
-                <div>
-                  <div className="brand-name">House</div>
-                  <div className="brand-sub">v2026.4 · online</div>
-                </div>
+      return (
+        <div className="app" data-screen-label={currentPage.name}>
+          <aside className="sidebar">
+            <div className="brand">
+              <div className="brand-dot" />
+              <div>
+                <div className="brand-name">House</div>
+                <div className="brand-sub">v2026.4 · online</div>
               </div>
-              <div className="nav-group">
-                <div className="nav-label">Areas</div>
-                {PAGES.map((p) => (
-                  <button
-                    key={p.id}
-                    className={`nav-item ${page === p.id ? "active" : ""}`}
-                    onClick={() => setPage(p.id)}
-                  >
-                    <Icon name={p.icon} /> {p.name}
-                    {p.id === "home" && (
-                      <span className="count">{onCount}</span>
-                    )}
-                    {p.id === "rooms" && (
-                      <span className="count">{ALL_ROOMS.length}</span>
-                    )}
-                    {p.id === "media" && (
-                      <span className="count">
-                        {activePlayers.some((p) => p.state === "playing")
-                          ? "▶"
-                          : activePlayers.length > 0
-                            ? "⏸"
-                            : "·"}
-                      </span>
-                    )}
-                    {p.id === "devices" && <span className="count">2</span>}
-                  </button>
-                ))}
-              </div>
-              <div className="sidebar-foot">
-                <div className="avatar" />
-                <div
-                  className="foot-text"
-                  onClick={() => {
-                    setNameInput(userName);
-                    setNamePrompt(true);
-                  }}
-                  style={{ cursor: "pointer" }}
-                >
-                  <div className="foot-name">{userName || "Set name"}</div>
-                  <div className="foot-status">
-                    <span className="status-dot" />
-                    Online
-                  </div>
-                </div>
-              </div>
-            </aside>
-
-            <main className="main">
-              <div className="topbar">
-                <div className="crumb">
-                  HOME · <b>{currentPage.name}</b>
-                </div>
-                <div className="search">
-                  <Icon name="search" size={12} />
-                  <input placeholder="Search rooms, devices, playlists…" />
-                  <span className="kbd">⌘K</span>
-                </div>
-              </div>
-
-              <div className="greeting">
-                <div className="greeting-text">
-                  <h1>
-                    {greeting},{" "}
-                    <span className="muted">{userName || "there"}.</span>
-                  </h1>
-                  <p>
-                    {onCount} {onCount === 1 ? "light" : "lights"} on
-                    <span className="sep">·</span>
-                    {solarKw === null
-                      ? "connecting to HA…"
-                      : solarKw >= homeKw
-                        ? "solar covers all consumption"
-                        : battFlowKw !== null && battFlowKw < -0.05
-                          ? "consuming battery power"
-                          : "consuming from grid"}
-                  </p>
-                </div>
-                <div className="clock">
-                  <div className="clock-time">
-                    {time}
-                    <span className="sec">:{sec}</span>
-                  </div>
-                  <div className="clock-date">{date}</div>
-                </div>
-              </div>
-
-              <div style={{ marginBottom: 32 }}>
-                <PresenceChips people={haPersons} />
-              </div>
-
-              {page === "home" && (
-                <HomePage
-                  rooms={effectiveRooms}
-                  toggleRoom={toggleRoom}
-                  dimRoom={dimRoom}
-                  openRoom={(id) => setOpenRoomId(id)}
-                  activePlayers={activePlayers}
-                  callService={callService}
-                  solarKw={solarKw}
-                  gridKw={gridKw}
-                  battPct={battPct}
-                  battFlowKw={battFlowKw}
-                  homeKw={homeKw}
-                  evBattPct={evBattPct}
-                  evChargKw={evChargKw}
-                  solarTodayKwh={solarTodayKwh}
-                  consumedTodayKwh={consumedTodayKwh}
-                  exportedTodayKwh={exportedTodayKwh}
-                />
-              )}
-              {page === "rooms" && (
-                <RoomsPage
-                  floor={floor}
-                  setFloor={setFloor}
-                  rooms={effectiveRooms}
-                  roomLightCounts={roomLightCounts}
-                  toggleRoom={toggleRoom}
-                  openRoom={(id) => setOpenRoomId(id)}
-                />
-              )}
-              {page === "media" && (
-                <MediaPage
-                  activePlayers={activePlayers}
-                  maPlayers={maPlayers}
-                  callService={callService}
-                  playingPl={playingPl}
-                  setPlayingPl={setPlayingPl}
-                />
-              )}
-              {page === "devices" && (
-                <DevicesPage
-                  vacuumState={vacuumState}
-                  vacuumBattery={vacuumBattPct}
-                  vacuumLastClean={vacuumLastClean}
-                  vacuumArea={vacuumArea}
-                  vacuumTime={vacuumTime}
-                  evPct={evBattPct}
-                  evRange={evRangeKm}
-                  evKw={evChargKw}
-                  callService={callService}
-                />
-              )}
-
-              <div
-                style={{
-                  marginTop: 48,
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  color: "var(--text-4)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                  textAlign: "center",
-                }}
-              >
-                Home Assistant · Last sync{" "}
-                {lastSync ? `${Math.round((now - lastSync) / 1000)}s ago` : "…"}{" "}
-                · {Object.keys(haStates).length} entities
-              </div>
-            </main>
-
-            {openRoomId && (
-              <RoomModal
-                room={ROOM_BY_ID[openRoomId]}
-                state={effectiveRooms[openRoomId]}
-                onClose={() => setOpenRoomId(null)}
-                onToggle={toggleRoom}
-                onDim={dimRoom}
-                haStates={haStates}
-                callService={callService}
-                roomLightIds={ROOM_LIGHTS_MAP[openRoomId] || []}
-                roomDeviceIds={ROOM_DEVICES_MAP[openRoomId] || []}
-              />
-            )}
-
-            {namePrompt && (
-              <div
-                style={{
-                  position: "fixed",
-                  inset: 0,
-                  background: "rgba(0,0,0,0.6)",
-                  backdropFilter: "blur(6px)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 9999,
-                }}
-              >
-                <div
-                  style={{
-                    background: "var(--card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 16,
-                    padding: 32,
-                    width: 320,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 20,
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 10,
-                        color: "var(--text-3)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.1em",
-                        marginBottom: 8,
-                      }}
-                    >
-                      Welcome
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 20,
-                        fontWeight: 600,
-                        color: "var(--text)",
-                      }}
-                    >
-                      What's your name?
-                    </div>
-                  </div>
-                  <input
-                    autoFocus
-                    value={nameInput}
-                    onChange={(e) => setNameInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && nameInput.trim()) {
-                        const n = nameInput.trim();
-                        localStorage.setItem("ha_dash_user", n);
-                        setUserName(n);
-                        setNamePrompt(false);
-                      }
-                    }}
-                    placeholder="Enter your name…"
-                    style={{
-                      background: "var(--bg)",
-                      border: "1px solid var(--border)",
-                      borderRadius: 8,
-                      padding: "10px 14px",
-                      fontSize: 15,
-                      color: "var(--text)",
-                      outline: "none",
-                      fontFamily: "inherit",
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      const n = nameInput.trim();
-                      if (!n) return;
-                      localStorage.setItem("ha_dash_user", n);
-                      setUserName(n);
-                      setNamePrompt(false);
-                    }}
-                    style={{
-                      background: "var(--accent)",
-                      color: "var(--accent-on)",
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "10px 0",
-                      fontSize: 14,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      fontFamily: "inherit",
-                    }}
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <TweaksPanel title="Tweaks">
-              <TweakSection title="Theme">
-                <TweakRadio
-                  label="Mode"
-                  value={tweaks.theme}
-                  onChange={(v) => setTweak("theme", v)}
-                  options={[
-                    { value: "dark", label: "Dark" },
-                    { value: "light", label: "Light" },
-                  ]}
-                />
-              </TweakSection>
-              <TweakSection title="Accent">
-                <TweakSelect
-                  label="Color"
-                  value={tweaks.accent}
-                  onChange={(v) => setTweak("accent", v)}
-                  options={[
-                    { value: "neutral", label: "Neutral (white/black)" },
-                    { value: "amber", label: "Warm amber" },
-                    { value: "cyan", label: "Cool cyan" },
-                    { value: "green", label: "Eco green" },
-                    { value: "purple", label: "Purple" },
-                  ]}
-                />
-              </TweakSection>
-            </TweaksPanel>
-
-            <nav className="mobile-nav">
+            </div>
+            <div className="nav-group">
+              <div className="nav-label">Areas</div>
               {PAGES.map((p) => (
                 <button
                   key={p.id}
-                  className={`mobile-nav-btn ${page === p.id ? "active" : ""}`}
+                  className={`nav-item ${page === p.id ? "active" : ""}`}
                   onClick={() => setPage(p.id)}
                 >
-                  <Icon name={p.icon} size={18} />
-                  {p.name}
+                  <Icon name={p.icon} /> {p.name}
+                  {p.id === "home" && (
+                    <span className="count">{onCount}</span>
+                  )}
+                  {p.id === "rooms" && (
+                    <span className="count">{ALL_ROOMS.length}</span>
+                  )}
+                  {p.id === "media" && (
+                    <span className="count">
+                      {activePlayers.some((p) => p.state === "playing")
+                        ? "▶"
+                        : activePlayers.length > 0
+                          ? "⏸"
+                          : "·"}
+                    </span>
+                  )}
+                  {p.id === "devices" && <span className="count">2</span>}
                 </button>
               ))}
-            </nav>
-          </div>
-        );
-      };
+            </div>
+            <div className="sidebar-foot">
+              <div className="avatar" />
+              <div
+                className="foot-text"
+                onClick={() => {
+                  setNameInput(userName);
+                  setNamePrompt(true);
+                }}
+                style={{ cursor: "pointer" }}
+              >
+                <div className="foot-name">{userName || "Set name"}</div>
+                <div className="foot-status">
+                  <span className="status-dot" />
+                  Online
+                </div>
+              </div>
+            </div>
+          </aside>
 
-      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-    </script>
-  </body>
+          <main className="main">
+            <div className="topbar">
+              <div className="crumb">
+                HOME · <b>{currentPage.name}</b>
+              </div>
+              <div className="search">
+                <Icon name="search" size={12} />
+                <input placeholder="Search rooms, devices, playlists…" />
+                <span className="kbd">⌘K</span>
+              </div>
+            </div>
+
+            <div className="greeting">
+              <div className="greeting-text">
+                <h1>
+                  {greeting},{" "}
+                  <span className="muted">{userName || "there"}.</span>
+                </h1>
+                <p>
+                  {onCount} {onCount === 1 ? "light" : "lights"} on
+                  <span className="sep">·</span>
+                  {solarKw === null
+                    ? "connecting to HA…"
+                    : solarKw >= homeKw
+                      ? "solar covers all consumption"
+                      : battFlowKw !== null && battFlowKw < -0.05
+                        ? "consuming battery power"
+                        : "consuming from grid"}
+                </p>
+              </div>
+              <div className="clock">
+                <div className="clock-time">
+                  {time}
+                  <span className="sec">:{sec}</span>
+                </div>
+                <div className="clock-date">{date}</div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 32 }}>
+              <PresenceChips people={haPersons} />
+            </div>
+
+            {page === "home" && (
+              <HomePage
+                rooms={effectiveRooms}
+                toggleRoom={toggleRoom}
+                dimRoom={dimRoom}
+                openRoom={(id) => setOpenRoomId(id)}
+                activePlayers={activePlayers}
+                callService={callService}
+                solarKw={solarKw}
+                gridKw={gridKw}
+                battPct={battPct}
+                battFlowKw={battFlowKw}
+                homeKw={homeKw}
+                evBattPct={evBattPct}
+                evChargKw={evChargKw}
+                solarTodayKwh={solarTodayKwh}
+                consumedTodayKwh={consumedTodayKwh}
+                exportedTodayKwh={exportedTodayKwh}
+              />
+            )}
+            {page === "rooms" && (
+              <RoomsPage
+                floor={floor}
+                setFloor={setFloor}
+                rooms={effectiveRooms}
+                roomLightCounts={roomLightCounts}
+                toggleRoom={toggleRoom}
+                openRoom={(id) => setOpenRoomId(id)}
+              />
+            )}
+            {page === "media" && (
+              <MediaPage
+                activePlayers={activePlayers}
+                maPlayers={maPlayers}
+                callService={callService}
+                playingPl={playingPl}
+                setPlayingPl={setPlayingPl}
+              />
+            )}
+            {page === "devices" && (
+              <DevicesPage
+                vacuumState={vacuumState}
+                vacuumBattery={vacuumBattPct}
+                vacuumLastClean={vacuumLastClean}
+                vacuumArea={vacuumArea}
+                vacuumTime={vacuumTime}
+                evPct={evBattPct}
+                evRange={evRangeKm}
+                evKw={evChargKw}
+                callService={callService}
+              />
+            )}
+
+            <div
+              style={{
+                marginTop: 48,
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                color: "var(--text-4)",
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                textAlign: "center",
+              }}
+            >
+              Home Assistant · Last sync{" "}
+              {lastSync ? `${Math.round((now - lastSync) / 1000)}s ago` : "…"}{" "}
+              · {Object.keys(haStates).length} entities
+            </div>
+          </main>
+
+          {openRoomId && (
+            <RoomModal
+              room={ROOM_BY_ID[openRoomId]}
+              state={effectiveRooms[openRoomId]}
+              onClose={() => setOpenRoomId(null)}
+              onToggle={toggleRoom}
+              onDim={dimRoom}
+              haStates={haStates}
+              callService={callService}
+              roomLightIds={ROOM_LIGHTS_MAP[openRoomId] || []}
+              roomDeviceIds={ROOM_DEVICES_MAP[openRoomId] || []}
+            />
+          )}
+
+          {namePrompt && (
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0,0,0,0.6)",
+                backdropFilter: "blur(6px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 9999,
+              }}
+            >
+              <div
+                style={{
+                  background: "var(--card)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 16,
+                  padding: 32,
+                  width: 320,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 20,
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 10,
+                      color: "var(--text-3)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                      marginBottom: 8,
+                    }}
+                  >
+                    Welcome
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 600,
+                      color: "var(--text)",
+                    }}
+                  >
+                    What's your name?
+                  </div>
+                </div>
+                <input
+                  autoFocus
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && nameInput.trim()) {
+                      const n = nameInput.trim();
+                      localStorage.setItem("ha_dash_user", n);
+                      setUserName(n);
+                      setNamePrompt(false);
+                    }
+                  }}
+                  placeholder="Enter your name…"
+                  style={{
+                    background: "var(--bg)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 8,
+                    padding: "10px 14px",
+                    fontSize: 15,
+                    color: "var(--text)",
+                    outline: "none",
+                    fontFamily: "inherit",
+                  }}
+                />
+                <button
+                  onClick={() => {
+                    const n = nameInput.trim();
+                    if (!n) return;
+                    localStorage.setItem("ha_dash_user", n);
+                    setUserName(n);
+                    setNamePrompt(false);
+                  }}
+                  style={{
+                    background: "var(--accent)",
+                    color: "var(--accent-on)",
+                    border: "none",
+                    borderRadius: 8,
+                    padding: "10px 0",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          )}
+
+          <TweaksPanel title="Tweaks">
+            <TweakSection title="Theme">
+              <TweakRadio
+                label="Mode"
+                value={tweaks.theme}
+                onChange={(v) => setTweak("theme", v)}
+                options={[
+                  { value: "dark", label: "Dark" },
+                  { value: "light", label: "Light" },
+                ]}
+              />
+            </TweakSection>
+            <TweakSection title="Accent">
+              <TweakSelect
+                label="Color"
+                value={tweaks.accent}
+                onChange={(v) => setTweak("accent", v)}
+                options={[
+                  { value: "neutral", label: "Neutral (white/black)" },
+                  { value: "amber", label: "Warm amber" },
+                  { value: "cyan", label: "Cool cyan" },
+                  { value: "green", label: "Eco green" },
+                  { value: "purple", label: "Purple" },
+                ]}
+              />
+            </TweakSection>
+          </TweaksPanel>
+
+          <nav className="mobile-nav">
+            {PAGES.map((p) => (
+              <button
+                key={p.id}
+                className={`mobile-nav-btn ${page === p.id ? "active" : ""}`}
+                onClick={() => setPage(p.id)}
+              >
+                <Icon name={p.icon} size={18} />
+                {p.name}
+              </button>
+            ))}
+          </nav>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+
 </html>
