@@ -1325,6 +1325,7 @@ const MediaNowPlaying = ({ player, callService, span = "col-12" }) => {
   const attr = player.attributes || {};
   const cur = q?.current_item?.media_item;
   const isPlaying = player.state === "playing";
+  const isShuffle = attr.shuffle === true;
   const call = (svc, extra) => haCall(callService, player, svc, extra);
   const title = cur?.name || attr.media_title || "—";
   const artist =
@@ -1335,11 +1336,23 @@ const MediaNowPlaying = ({ player, callService, span = "col-12" }) => {
   return (
     <div className={`card ${span}`}>
       <div className="card-h">
-        <div className="card-title">{attr.friendly_name || "Now Playing"}</div>
-        <span className={`chip ${isPlaying ? "live" : ""}`}>
-          <span className="dot" />
-          {isPlaying ? "Playing" : "Paused"}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="card-title">{attr.friendly_name || "Now Playing"}</div>
+          <span className={`chip ${isPlaying ? "live" : ""}`}>
+            <span className="dot" />
+            {isPlaying ? "Playing" : "Paused"}
+          </span>
+        </div>
+        <button
+          className="m-btn"
+          style={{ width: 28, height: 28 }}
+          onClick={() => {
+            call("turn_off");
+            call("clear_playlist");
+          }}
+        >
+          <Icon name="x" size={14} />
+        </button>
       </div>
       <div className="media">
         {image ? (
@@ -1385,6 +1398,13 @@ const MediaNowPlaying = ({ player, callService, span = "col-12" }) => {
           </button>
           <button className="m-btn" onClick={() => call("media_next_track")}>
             <Icon name="skipNext" size={14} />
+          </button>
+          <button
+            className={`m-btn ${isShuffle ? "active" : ""}`}
+            style={isShuffle ? { color: "var(--accent-on)", background: "var(--accent)", borderColor: "var(--accent)" } : {}}
+            onClick={() => call("shuffle_set", { shuffle: !isShuffle })}
+          >
+            <Icon name="shuffle" size={14} />
           </button>
         </div>
       </div>
@@ -1483,6 +1503,7 @@ const MediaFullPlayer = ({ player, callService, span = "col-12" }) => {
   const attr = player.attributes || {};
   const cur = q?.current_item?.media_item;
   const isPlaying = player.state === "playing";
+  const isShuffle = attr.shuffle === true;
   const call = (svc, extra) => haCall(callService, player, svc, extra);
   const title = cur?.name || attr.media_title || "—";
   const artist =
@@ -1493,11 +1514,23 @@ const MediaFullPlayer = ({ player, callService, span = "col-12" }) => {
   return (
     <div className={`card ${span}`}>
       <div className="card-h">
-        <div className="card-title">{attr.friendly_name || "Now Playing"}</div>
-        <span className={`chip ${isPlaying ? "live" : ""}`}>
-          <span className="dot" />
-          {isPlaying ? "Playing" : "Paused"}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="card-title">{attr.friendly_name || "Now Playing"}</div>
+          <span className={`chip ${isPlaying ? "live" : ""}`}>
+            <span className="dot" />
+            {isPlaying ? "Playing" : "Paused"}
+          </span>
+        </div>
+        <button
+          className="m-btn"
+          style={{ width: 28, height: 28 }}
+          onClick={() => {
+            call("turn_off");
+            call("clear_playlist");
+          }}
+        >
+          <Icon name="x" size={14} />
+        </button>
       </div>
       <div className="media">
         {image ? (
@@ -1546,6 +1579,13 @@ const MediaFullPlayer = ({ player, callService, span = "col-12" }) => {
         </button>
         <button className="m-btn" onClick={() => call("media_next_track")}>
           <Icon name="skipNext" size={14} />
+        </button>
+        <button
+          className={`m-btn ${isShuffle ? "active" : ""}`}
+          style={isShuffle ? { color: "var(--accent-on)", background: "var(--accent)", borderColor: "var(--accent)" } : {}}
+          onClick={() => call("shuffle_set", { shuffle: !isShuffle })}
+        >
+          <Icon name="shuffle" size={14} />
         </button>
       </div>
     </div>
